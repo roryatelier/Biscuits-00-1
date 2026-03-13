@@ -1,0 +1,113 @@
+.stepper {
+  display: flex;
+  gap: 0;
+}
+
+/* ── Horizontal ── */
+.horizontal {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.horizontal .step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+}
+
+.horizontal .connector {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--slate-300);
+  z-index: 0;
+}
+
+.horizontal .step.done .connector,
+.horizontal .step.active .connector {
+  background: var(--brand-400);
+}
+
+/* ── Vertical ── */
+.vertical {
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vertical .step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  padding: 8px 0;
+}
+
+.vertical .connector {
+  position: absolute;
+  top: 32px;
+  left: 11px;
+  width: 2px;
+  height: calc(100% - 8px);
+  background: var(--slate-300);
+  z-index: 0;
+}
+
+.vertical .step.done .connector {
+  background: var(--brand-400);
+}
+
+/* ── Dot ── */
+.dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--slate-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+  color: var(--slate-400);
+  background: var(--white-500);
+  z-index: 1;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.step.active .dot {
+  border-color: var(--brand-400);
+  color: var(--brand-400);
+}
+
+.step.done .dot {
+  background: var(--brand-400);
+  border-color: var(--brand-400);
+}
+
+/* ── Label ── */
+.label {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--slate-400);
+  transition: color 0.15s, font-weight 0.1s;
+  line-height: 1;
+}
+
+.step.active .label {
+  font-weight: 600;
+  color: var(--black-500);
+}
+
+.step.done .label {
+  color: var(--slate-500);
+}
+
+.horizontal .label {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 12px;
+}

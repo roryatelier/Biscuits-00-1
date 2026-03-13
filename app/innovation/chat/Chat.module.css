@@ -1,0 +1,80 @@
+/* 3-panel layout wrapper */
+.wrapper {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--slate-100);
+}
+
+/* Sidebar toggle button (floats outside when sidebar collapsed) */
+.sidebarToggle {
+  position: fixed;
+  top: 16px;
+  left: 12px;
+  z-index: 100;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white-500);
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.sidebarToggle:hover {
+  background: var(--slate-100);
+}
+
+.sidebarToggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.sidebarToggle.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Main content: left + divider + right */
+.mainContent {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  transition: margin-left 0.25s ease;
+}
+
+/* Left (chat) panel */
+.leftPanel {
+  height: 100%;
+  overflow: hidden;
+  transition: width 0.25s ease;
+}
+
+/* Vertical divider */
+.divider {
+  width: 1px;
+  background: var(--slate-300);
+  flex-shrink: 0;
+  height: 100%;
+}
+
+/* Right panel */
+.rightPanel {
+  height: 100%;
+  overflow: hidden;
+  transition: width 0.25s ease;
+}
+
+@media (max-width: 768px) {
+  .wrapper { flex-direction: column; }
+  .mainContent { flex-direction: column; }
+  .leftPanel { width: 100% !important; }
+  .rightPanel { width: 100% !important; }
+  .divider { width: 100%; height: 1px; }
+  .page { padding: 24px 16px; }
+}

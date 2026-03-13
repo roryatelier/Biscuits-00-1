@@ -1,0 +1,229 @@
+/* FIX 7: scroll shadow using background-attachment trick — shows shadow only when content overflows */
+.rightPanel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  background:
+    linear-gradient(var(--white-500) 30%, transparent),
+    linear-gradient(transparent, var(--white-500) 70%) 0 100%,
+    radial-gradient(farthest-side at 50% 0, rgba(0,0,0,0.08), transparent),
+    radial-gradient(farthest-side at 50% 100%, rgba(0,0,0,0.08), transparent) 0 100%;
+  background-repeat: no-repeat;
+  background-color: var(--white-500);
+  background-size: 100% 40px, 100% 40px, 100% 12px, 100% 12px;
+  background-attachment: local, local, scroll, scroll;
+}
+
+/* Panel header */
+.header {
+  padding: 20px 28px 16px;
+  border-bottom: 1px solid var(--slate-300);
+  flex-shrink: 0;
+}
+
+.headerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.panelTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--black-500);
+  letter-spacing: -0.01em;
+}
+
+.specsBtn {
+  padding: 6px 14px;
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-md);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--slate-400);
+  cursor: not-allowed;
+  background: transparent;
+  white-space: nowrap;
+}
+
+/* Selection cards wrapper */
+.selectionsWrapper {
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Individual card */
+.card {
+  border-bottom: 1px solid var(--slate-300);
+}
+
+.card:last-child {
+  border-bottom: none;
+}
+
+/* Card header (always visible) */
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 28px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.cardHeader:hover {
+  background: var(--slate-100);
+}
+
+.cardIcon {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+}
+
+.cardRight {
+  flex: 1;
+}
+
+.cardTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--black-500);
+  margin-bottom: 2px;
+}
+
+.cardSubtitle {
+  font-size: 12px;
+  color: var(--slate-500);
+  line-height: 1.4;
+}
+
+/* Card expandable content */
+.cardContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+/* FIX 4: left border accent ties expanded content to its card header */
+.cardContent.open {
+  max-height: 500px;
+  border-left: 3px solid var(--brand-400);
+  margin-left: 28px;
+  margin-right: 28px;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  background: var(--slate-100);
+}
+
+/* Sample Order detail inside card */
+.orderDetail {
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Each row in order detail */
+.orderRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--slate-300);
+}
+
+.orderRow:last-child {
+  border-bottom: none;
+}
+
+.orderRowIcon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.orderRowContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.orderRowTitle {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--slate-500);
+  text-transform: uppercase;
+}
+
+.orderRowValue {
+  font-size: 13px;
+  color: var(--black-500);
+  line-height: 1.4;
+}
+
+/* Order summary (no icon row) */
+.summarySection {
+  padding: 14px 0;
+}
+
+.summaryTitle {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--slate-500);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.summaryProject {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--black-500);
+  margin-bottom: 10px;
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.summaryItemName {
+  font-size: 13px;
+  color: var(--black-500);
+}
+
+.summaryItemPrice {
+  font-size: 13px;
+  color: var(--black-500);
+}
+
+.summaryTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0 0;
+  border-top: 1px solid var(--slate-300);
+  margin-top: 6px;
+}
+
+.summaryTotalLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--black-500);
+}
+
+.summaryTotalAmount {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--black-500);
+}

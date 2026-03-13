@@ -1,0 +1,78 @@
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}
+
+.block {
+  background: linear-gradient(90deg, var(--slate-200) 25%, var(--slate-100) 50%, var(--slate-200) 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* Sizes */
+.lineXs { height: 10px; width: 40%; }
+.lineSm { height: 12px; width: 30%; }
+.lineMd { height: 14px; width: 60%; }
+.lineLg { height: 14px; width: 80%; }
+
+/* ── Card Grid ── */
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  padding: 24px 28px;
+}
+
+.skeletonCard {
+  background: var(--white-500);
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.cardImage { height: 130px; border-radius: 0; }
+.cardBody { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+
+/* ── Table ── */
+.tableWrap {
+  background: var(--white-500);
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.tableHeader {
+  display: flex; gap: 16px; padding: 14px 20px;
+  background: var(--slate-100); border-bottom: 1px solid var(--slate-300);
+}
+
+.thBlock { height: 12px; flex: 1; }
+
+.tableRow {
+  display: flex; gap: 16px; padding: 12px 20px;
+  border-bottom: 1px solid var(--slate-300);
+}
+
+.tableRow:last-child { border-bottom: none; }
+.tdBlock { height: 14px; flex: 1; }
+
+/* ── List ── */
+.list { display: flex; flex-direction: column; gap: 12px; }
+
+.listItem {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: var(--white-500); border: 1px solid var(--slate-300);
+  border-radius: var(--radius-lg); padding: 18px 24px;
+}
+
+.listAvatar { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; }
+.listContent { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+
+/* ── Detail ── */
+.detail { padding: 32px 40px; }
+.detailHeader { height: 16px; width: 20%; margin-bottom: 12px; }
+.detailTitle { height: 24px; width: 50%; margin-bottom: 8px; }
+.detailSub { height: 12px; width: 35%; margin-bottom: 24px; }
+.detailBody { display: flex; flex-direction: column; gap: 10px; }
+.detailRow { height: 16px; width: 100%; }

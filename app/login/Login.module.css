@@ -1,0 +1,139 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--slate-100);
+  padding: 24px;
+}
+
+.card {
+  background: var(--white-500);
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+.logo {
+  width: 120px;
+}
+
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--slate-500);
+  text-transform: uppercase;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--black-500);
+  background: var(--white-500);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input::placeholder {
+  color: var(--slate-400);
+}
+
+.input:focus {
+  border-color: var(--brand-400);
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 12px;
+  background: var(--black-500);
+  color: var(--white-500);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.15s;
+}
+
+.submitBtn:hover {
+  background: var(--black-hover);
+}
+
+.error {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--red-error-bg);
+  border: 1px solid var(--red-error-border);
+  border-radius: var(--radius-md);
+  color: var(--red-error-text);
+  font-size: 13px;
+  text-align: center;
+}
+
+.link {
+  font-size: 13px;
+  color: var(--slate-500);
+  text-align: center;
+}
+
+.link a {
+  color: var(--brand-500, #6366f1);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.link a:hover {
+  text-decoration: underline;
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.nameRow {
+  display: flex;
+  gap: 12px;
+}
+
+.footnote {
+  font-size: 12px;
+  color: var(--slate-400);
+  text-align: center;
+}
+
+.inviteBanner {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--green-success-bg);
+  border: 1px solid var(--green-success-border);
+  border-radius: var(--radius-md);
+  color: var(--green-success-text);
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.5;
+}

@@ -1,0 +1,60 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── Continuous ── */
+.track {
+  flex: 1;
+  height: 6px;
+  background: var(--slate-300);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: var(--brand-400);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.percent {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--slate-500);
+  min-width: 32px;
+  text-align: right;
+}
+
+/* ── Segmented ── */
+.segmentedBar {
+  display: flex;
+  gap: 3px;
+}
+
+.segment {
+  width: 20px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--slate-300);
+  transition: background 0.15s;
+}
+
+.segmentDone {
+  background: var(--brand-400);
+}
+
+/* ── Label ── */
+.label {
+  font-size: 11px;
+  color: var(--slate-400);
+  white-space: nowrap;
+}

@@ -1,0 +1,181 @@
+.page { padding: var(--page-padding-y) var(--page-padding-x) 80px; }
+
+/* ── Breadcrumb ── */
+.breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--slate-400); margin-bottom: 24px; }
+.breadLink { color: var(--brand-400); cursor: pointer; transition: opacity 0.15s; }
+.breadLink:hover { opacity: 0.75; }
+.breadSep { color: var(--slate-300); }
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--slate-300);
+}
+
+.headerMeta { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+
+.formatBadge {
+  font-size: 11px; font-weight: 700; padding: 3px 8px;
+  border-radius: var(--radius-sm); background: var(--purple-200); color: var(--purple-500);
+}
+
+.statusBadge {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: var(--radius-sm); background: var(--green-100); color: var(--green-400);
+}
+
+.title { font-size: 22px; font-weight: 700; color: var(--black-500); letter-spacing: -0.02em; margin-bottom: 6px; }
+.subtitle { font-size: 13px; color: var(--slate-400); line-height: 1.5; }
+
+.headerActions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.actionBtn {
+  padding: 9px 18px; background: var(--black-500); color: var(--white-500);
+  border-radius: var(--radius-md); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: background 0.15s; white-space: nowrap;
+}
+.actionBtn:hover { background: var(--black-hover); }
+
+.actionBtnSecondary {
+  padding: 9px 16px; background: var(--white-500); color: var(--slate-500);
+  border: 1px solid var(--slate-300); border-radius: var(--radius-md);
+  font-size: 13px; cursor: pointer; transition: border-color 0.15s, color 0.15s; white-space: nowrap;
+}
+.actionBtnSecondary:hover { border-color: var(--slate-400); color: var(--black-500); }
+
+/* ── Tabs ── */
+.tabs { display: flex; gap: 0; border-bottom: 2px solid var(--slate-300); margin-bottom: 24px; }
+
+.tab {
+  display: flex; align-items: center; gap: 6px; padding: 10px 20px;
+  font-size: 13px; font-weight: 500; color: var(--slate-400);
+  cursor: pointer; border-bottom: 2px solid transparent;
+  margin-bottom: -2px; transition: color 0.15s; white-space: nowrap;
+}
+.tab:hover { color: var(--black-500); }
+.tabActive { color: var(--black-500); border-bottom-color: var(--black-500); font-weight: 600; }
+
+.tabContent {
+  background: var(--white-500); border: 1px solid var(--slate-300);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+
+/* ── Specifications ── */
+.specGrid { display: grid; grid-template-columns: 1fr 1fr; }
+
+.specRow {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--slate-300);
+  border-right: 1px solid var(--slate-300);
+}
+.specRow:nth-child(even) { border-right: none; }
+.specRow:nth-last-child(-n+2) { border-bottom: none; }
+
+.specLabel {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--slate-400); flex-shrink: 0;
+}
+.specValue { font-size: 13px; color: var(--black-500); text-align: right; line-height: 1.4; }
+
+/* ── Artwork & Preview ── */
+.artworkLayout { display: grid; grid-template-columns: 1fr 1fr; min-height: 400px; }
+
+.previewArea {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px; border-right: 1px solid var(--slate-300);
+  background: var(--slate-100);
+}
+
+.previewBox {
+  width: 220px; height: 280px; background: var(--white-500);
+  border: 2px dashed var(--slate-300); border-radius: var(--radius-lg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+}
+
+.previewIcon { font-size: 56px; opacity: 0.25; }
+.previewLabel { font-size: 13px; font-weight: 600; color: var(--black-500); text-align: center; padding: 0 16px; }
+.previewSub { font-size: 11px; color: var(--slate-400); }
+.previewNote { font-size: 11px; color: var(--slate-400); margin-top: 16px; font-style: italic; }
+
+.artworkControls { padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+
+.controlGroup { display: flex; flex-direction: column; gap: 8px; }
+.controlLabel {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--slate-400);
+}
+
+.formatSelector { display: flex; gap: 8px; }
+
+.formatOption {
+  display: flex; align-items: center; gap: 8px; padding: 10px 16px;
+  border: 2px solid var(--slate-300); border-radius: var(--radius-md);
+  font-size: 13px; color: var(--slate-500); cursor: pointer;
+  transition: all 0.15s; background: var(--white-500);
+}
+.formatOption:hover { border-color: var(--slate-400); }
+.formatOptionActive {
+  border-color: var(--brand-400); color: var(--brand-400);
+  background: var(--brand-100); font-weight: 600;
+}
+.formatOptionIcon { font-size: 18px; }
+
+.colorSelector { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.colorOption {
+  padding: 6px 12px; border: 1px solid var(--slate-300);
+  border-radius: var(--radius-sm); font-size: 12px; color: var(--slate-500);
+  cursor: pointer; transition: all 0.15s;
+}
+.colorOption:hover { border-color: var(--slate-400); }
+.colorOptionActive {
+  border-color: var(--brand-400); color: var(--brand-400);
+  background: var(--brand-100); font-weight: 600;
+}
+
+/* Upload zone */
+.uploadZone {
+  border: 2px dashed var(--slate-300); border-radius: var(--radius-md);
+  padding: 28px; text-align: center; cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.uploadZone:hover { border-color: var(--brand-300); background: var(--brand-100); }
+.uploadZoneDragOver { border-color: var(--brand-400); background: var(--brand-100); }
+
+.uploadText { font-size: 13px; font-weight: 500; color: var(--slate-500); margin-bottom: 4px; }
+.uploadSub { font-size: 11px; color: var(--slate-400); }
+
+.uploadSuccess {
+  display: flex; align-items: center; gap: 10px; justify-content: center;
+}
+.uploadCheckIcon { color: var(--green-400); font-weight: 700; }
+.uploadRemove {
+  font-size: 12px; color: var(--red-400); cursor: pointer; text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ── Ordering ── */
+.orderInfo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+
+.orderCard {
+  padding: 28px 24px; text-align: center;
+  border-right: 1px solid var(--slate-300);
+}
+.orderCard:last-child { border-right: none; }
+
+.orderCardTitle {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--slate-400); margin-bottom: 8px;
+}
+.orderCardValue { font-size: 22px; font-weight: 700; color: var(--black-500); margin-bottom: 6px; }
+.orderCardSub { font-size: 12px; color: var(--slate-400); }
+
+.orderAction {
+  padding: 20px 24px; border-top: 1px solid var(--slate-300);
+  display: flex; justify-content: center;
+}

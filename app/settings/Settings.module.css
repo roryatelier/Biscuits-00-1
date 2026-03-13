@@ -1,0 +1,141 @@
+.page { padding: var(--page-padding-y) var(--page-padding-x) 80px; max-width: 920px; margin: 0 auto; }
+
+/* Header */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--slate-300);
+}
+
+.pageTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--black-500);
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.pageSubtitle { font-size: 13px; color: var(--slate-400); }
+
+/* Sections */
+.section { margin-bottom: 32px; }
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--black-500);
+  letter-spacing: -0.01em;
+  margin-bottom: 12px;
+}
+
+/* Card container */
+.card {
+  background: var(--white-500);
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Field layout */
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.fieldRow {
+  display: flex;
+  gap: 16px;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--black-500);
+}
+
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--black-500);
+  outline: none;
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+
+.input:focus { border-color: var(--brand-400); }
+.input::placeholder { color: var(--slate-400); }
+
+/* Actions */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+.primaryBtn {
+  padding: 9px 20px;
+  background: var(--black-500);
+  color: var(--white-500);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.primaryBtn:hover { background: var(--black-hover); }
+
+.btnDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btnDisabled:hover { background: var(--black-500); }
+
+/* Toast */
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #ecfdf5;
+  color: var(--green-400);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  animation: slideIn 0.2s ease;
+}
+
+.toastIcon { font-size: 16px; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Error banner */
+.errorBanner {
+  padding: 10px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-md);
+  color: #dc2626;
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .page { padding: 24px 16px 40px; }
+}

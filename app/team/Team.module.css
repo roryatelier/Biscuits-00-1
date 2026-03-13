@@ -1,0 +1,259 @@
+.page { padding: var(--page-padding-y) var(--page-padding-x) 80px; max-width: 920px; margin: 0 auto; }
+
+/* ── Header ── */
+.header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--slate-300);
+}
+
+.pageTitle { font-size: 22px; font-weight: 700; color: var(--black-500); letter-spacing: -0.02em; margin-bottom: 4px; }
+.pageSubtitle { font-size: 13px; color: var(--slate-400); }
+
+.inviteBtn {
+  padding: 10px 20px; background: var(--black-500); color: var(--white-500);
+  border-radius: var(--radius-md); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: background 0.15s; white-space: nowrap;
+}
+.inviteBtn:hover { background: var(--black-hover); }
+
+/* ── Toast ── */
+.toast {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 20px; background: var(--green-100); color: var(--green-400);
+  border-radius: var(--radius-md); font-size: 13px; font-weight: 600;
+  margin-bottom: 20px; animation: slideIn 0.2s ease;
+}
+
+.toastIcon { font-size: 16px; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Sections ── */
+.section { margin-bottom: 32px; }
+.sectionTitle {
+  font-size: 14px; font-weight: 700; color: var(--black-500);
+  letter-spacing: -0.01em; margin-bottom: 12px;
+}
+
+/* ── Member list ── */
+.memberList { display: flex; flex-direction: column; gap: 8px; }
+
+.memberCard {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; background: var(--white-500); border: 1px solid var(--slate-300);
+  border-radius: var(--radius-lg); padding: 16px 20px;
+  transition: border-color 0.15s;
+}
+.memberCard:hover { border-color: var(--slate-400); }
+
+.pendingCard { background: var(--slate-100); border-style: dashed; }
+
+.memberLeft { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
+
+/* ── Avatar ── */
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 600; color: var(--white-500); flex-shrink: 0;
+}
+
+.avatarAdmin  { background: var(--brand-400); }
+.avatarEditor { background: var(--purple-500); }
+.avatarViewer { background: var(--slate-400); }
+.avatarPending { background: var(--slate-300); color: var(--slate-500); border: 2px dashed var(--slate-400); }
+
+/* ── Member info ── */
+.memberInfo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+.memberNameRow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.memberName { font-size: 14px; font-weight: 600; color: var(--black-500); }
+.memberEmail { font-size: 13px; color: var(--slate-500); }
+.memberMeta { font-size: 11px; color: var(--slate-400); }
+
+/* ── Role badges ── */
+.roleBadge {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: var(--radius-sm);
+}
+
+.roleAdmin  { background: var(--brand-100); color: var(--brand-400); }
+.roleEditor { background: var(--purple-200); color: var(--purple-500); }
+.roleViewer { background: var(--slate-100); color: var(--slate-400); }
+
+/* ── Pending badge ── */
+.pendingBadge {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: var(--radius-sm);
+  background: var(--orange-100); color: var(--orange-400);
+}
+
+/* ── Member actions ── */
+.memberActions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.roleSelect {
+  padding: 6px 10px; border: 1px solid var(--slate-300); border-radius: var(--radius-sm);
+  font-size: 12px; color: var(--slate-500); background: var(--white-500);
+  cursor: pointer; outline: none; font-family: inherit;
+}
+.roleSelect:focus { border-color: var(--brand-400); }
+
+.removeBtn {
+  font-size: 12px; color: var(--red-400); cursor: pointer;
+  padding: 6px 10px; border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+.removeBtn:hover { background: var(--red-100); }
+
+.resendBtn {
+  font-size: 12px; color: var(--brand-400); cursor: pointer;
+  padding: 6px 10px; border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+.resendBtn:hover { background: var(--brand-100); }
+
+.resendConfirm { font-size: 12px; color: var(--green-400); font-weight: 600; padding: 6px 10px; }
+
+/* ── Modal ── */
+.modalOverlay {
+  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4);
+  display: flex; align-items: center; justify-content: center; z-index: 100;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  background: var(--white-500); border-radius: var(--radius-lg);
+  padding: 32px; width: 480px; max-width: 90vw;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  animation: modalSlide 0.2s ease;
+}
+
+@keyframes modalSlide {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modalTitle { font-size: 18px; font-weight: 700; color: var(--black-500); margin-bottom: 6px; }
+.modalSub { font-size: 13px; color: var(--slate-500); line-height: 1.6; margin-bottom: 24px; }
+
+.modalField { margin-bottom: 20px; }
+
+.fieldLabel {
+  display: block; font-size: 13px; font-weight: 600;
+  color: var(--black-500); margin-bottom: 6px;
+}
+
+.input {
+  width: 100%; padding: 10px 14px; border: 1px solid var(--slate-300);
+  border-radius: var(--radius-md); font-size: 14px; color: var(--black-500);
+  outline: none; transition: border-color 0.15s; font-family: inherit;
+}
+.input:focus { border-color: var(--brand-400); }
+.input::placeholder { color: var(--slate-400); }
+
+/* ── Role selection cards ── */
+.roleCards { display: flex; flex-direction: column; gap: 8px; }
+
+.roleCard {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 14px 16px; border: 2px solid var(--slate-300);
+  border-radius: var(--radius-md); cursor: pointer;
+  text-align: left; transition: all 0.15s;
+}
+.roleCard:hover { border-color: var(--slate-400); }
+
+.roleCardActive {
+  border-color: var(--brand-400); background: var(--brand-100);
+}
+
+.roleCardLabel { font-size: 14px; font-weight: 600; color: var(--black-500); }
+.roleCardDesc { font-size: 12px; color: var(--slate-400); }
+.roleCardActive .roleCardLabel { color: var(--brand-400); }
+
+/* ── Modal actions ── */
+.modalActions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+
+.cancelBtn {
+  padding: 9px 18px; background: var(--white-500); color: var(--slate-500);
+  border: 1px solid var(--slate-300); border-radius: var(--radius-md);
+  font-size: 13px; cursor: pointer; transition: all 0.15s;
+}
+.cancelBtn:hover { border-color: var(--slate-400); color: var(--black-500); }
+
+.primaryBtn {
+  padding: 9px 20px; background: var(--black-500); color: var(--white-500);
+  border-radius: var(--radius-md); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: background 0.15s;
+}
+.primaryBtn:hover { background: var(--black-hover); }
+
+.btnDisabled { opacity: 0.4; cursor: not-allowed; }
+.btnDisabled:hover { background: var(--black-500); }
+
+.dangerBtn {
+  padding: 9px 20px; background: var(--red-400); color: var(--white-500);
+  border-radius: var(--radius-md); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: background 0.15s;
+}
+.dangerBtn:hover { background: #e54030; }
+
+/* ── Confirm card ── */
+.confirmCard {
+  background: var(--slate-100); border: 1px solid var(--slate-300);
+  border-radius: var(--radius-md); overflow: hidden;
+}
+
+.confirmRow {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; border-bottom: 1px solid var(--slate-300);
+}
+.confirmRow:last-child { border-bottom: none; }
+
+.confirmLabel {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--slate-400);
+}
+.confirmValue { font-size: 13px; color: var(--black-500); }
+
+/* ── Roles reference table ── */
+.rolesRef {
+  background: var(--white-500); border: 1px solid var(--slate-300);
+  border-radius: var(--radius-lg); padding: 24px;
+}
+
+.rolesGrid { display: flex; flex-direction: column; }
+
+.rolesHeader {
+  display: grid; grid-template-columns: 1fr 80px 80px 80px;
+  padding: 10px 0; border-bottom: 2px solid var(--slate-300);
+}
+
+.rolesColHead {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--slate-400); text-align: center;
+}
+
+.rolesRow {
+  display: grid; grid-template-columns: 1fr 80px 80px 80px;
+  padding: 10px 0; border-bottom: 1px solid var(--slate-300);
+}
+.rolesRow:last-child { border-bottom: none; }
+
+.rolesPerm { font-size: 13px; color: var(--slate-500); }
+
+.rolesCell { text-align: center; font-size: 14px; }
+
+.checkMark { color: var(--green-400); font-weight: 700; }
+.dash { color: var(--slate-300); }
+
+@media (max-width: 768px) {
+  .page { padding: 24px 16px 40px; }
+}

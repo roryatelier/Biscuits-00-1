@@ -1,66 +1,76 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { auth } from '@/auth';
+import { AtelierLogo } from '@/components/icons/Icons';
+import { BeakerIcon, SparkleIcon, BoxIcon } from '@/components/icons/Icons';
+import styles from './Landing.module.css';
 
-export default function Home() {
+export default async function LandingPage() {
+  const session = await auth();
+  if (session) {
+    redirect('/dashboard');
+  }
+
   return (
     <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+      {/* Nav */}
+      <nav className={styles.nav}>
+        <div className={styles.navLogo}>
+          <AtelierLogo />
+        </div>
+        <div className={styles.navActions}>
+          <Link href="/login" className={styles.signInBtn}>Sign in</Link>
+          <Link href="/register" className={styles.getStartedBtn}>Get started</Link>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <section className={styles.hero}>
+        <h1 className={styles.heroTitle}>
+          The composable manufacturing platform for beauty & wellness
+        </h1>
+        <p className={styles.heroSub}>
+          From formulation to fulfillment, Atelier brings your entire product
+          innovation pipeline into one intelligent workspace.
+        </p>
+        <div className={styles.heroCta}>
+          <Link href="/register" className={styles.heroPrimary}>Get started free</Link>
+          <Link href="/login" className={styles.heroSecondary}>Sign in</Link>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className={styles.features}>
+        <div className={styles.featureCard}>
+          <div className={styles.featureIcon}><BeakerIcon /></div>
+          <h3 className={styles.featureTitle}>Formulation catalog</h3>
+          <p className={styles.featureDesc}>
+            Browse, compare, and manage base formulations across categories.
+            Track versions, regulatory markets, and ingredient lists in one place.
           </p>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className={styles.featureCard}>
+          <div className={styles.featureIcon}><SparkleIcon /></div>
+          <h3 className={styles.featureTitle}>AI-powered innovation</h3>
+          <p className={styles.featureDesc}>
+            Use Atelier AI to explore product concepts, generate briefs, and
+            accelerate your innovation pipeline from idea to sample.
+          </p>
         </div>
-      </main>
+        <div className={styles.featureCard}>
+          <div className={styles.featureIcon}><BoxIcon /></div>
+          <h3 className={styles.featureTitle}>Sample tracking</h3>
+          <p className={styles.featureDesc}>
+            Order samples, track production stages, and collect team reviews
+            — all connected to your formulations and packaging.
+          </p>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className={styles.footer}>
+        Platform01 &middot; The future of manufacturing
+      </footer>
     </div>
   );
 }
