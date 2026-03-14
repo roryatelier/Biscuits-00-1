@@ -362,3 +362,14 @@
   font-weight: 600;
   color: var(--black-500);
 }
+
+@media (max-width: 768px) {
+  .page { flex-direction: column; }
+  .sidebar { width: 100%; min-width: 0; padding: 24px 16px; border-right: none; border-bottom: 1px solid var(--slate-300); }
+  .sidebarLogo { margin-bottom: 16px; }
+  .stepList { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+  .stepItem { gap: 6px; }
+  .exitLink { margin-top: 0; }
+  .main { padding: 32px 16px; }
+  .templateGrid { grid-template-columns: 1fr; }
+}

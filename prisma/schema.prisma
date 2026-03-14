@@ -20,8 +20,13 @@ model User {
   accounts   Account[]
   sessions   Session[]
 
-  teamMemberships TeamMember[]
-  sentInvitations Invitation[]
+  teamMemberships  TeamMember[]
+  sentInvitations  Invitation[]
+  createdProjects  Project[]      @relation("createdProjects")
+  createdFormulations Formulation[] @relation("createdFormulations")
+  createdSampleOrders SampleOrder[] @relation("createdSampleOrders")
+  sampleReviews    SampleReview[] @relation("sampleReviews")
+  uploads          Upload[]       @relation("uploads")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -71,6 +76,10 @@ model Team {
 
   members     TeamMember[]
   invitations Invitation[]
+  projects    Project[]
+  formulations Formulation[]
+  packagingOptions PackagingOption[]
+  sampleOrders SampleOrder[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -104,4 +113,163 @@ model Invitation {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ─── Product models ──────────────────────────────────────
+
+model Project {
+  id          String @id @default(cuid())
+  name        String
+  description String?
+  status      String @default("Brief")   // Brief, In Development, Sampling, Launched
+  category    String?                     // Haircare, Skincare, etc.
+  market      String?                     // AU, US, EU, etc.
+  claims      String?                     // JSON array stored as string (SQLite)
+  teamId      String
+  createdById String
+
+  team    Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  creator User @relation("createdProjects", fields: [createdById], references: [id])
+
+  formulations ProjectFormulation[]
+  sampleOrders SampleOrder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Formulation {
+  id          String @id @default(cuid())
+  name        String
+  category    String?   // Shampoo, Serum, Moisturiser, etc.
+  status      String @default("Draft")   // Draft, In Review, Approved, Archived
+  market      String?
+  description String?
+  version     String @default("1.0")
+  teamId      String?
+  createdById String?
+
+  team    Team? @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  creator User? @relation("createdFormulations", fields: [createdById], references: [id])
+
+  ingredients FormulationIngredient[]
+  projects    ProjectFormulation[]
+  sampleOrders SampleOrder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Ingredient {
+  id          String @id @default(cuid())
+  name        String          // INCI name
+  casNumber   String?
+  function    String?         // Surfactant, Humectant, Preservative, etc.
+  description String?
+
+  formulations FormulationIngredient[]
+}
+
+model FormulationIngredient {
+  id             String @id @default(cuid())
+  formulationId  String
+  ingredientId   String
+  percentage     Float?
+  role           String?   // Active, Base, Preservative, Fragrance, etc.
+
+  formulation Formulation @relation(fields: [formulationId], references: [id], onDelete: Cascade)
+  ingredient  Ingredient  @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@unique([formulationId, ingredientId])
+}
+
+model ProjectFormulation {
+  id             String @id @default(cuid())
+  projectId      String
+  formulationId  String
+
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  formulation Formulation @relation(fields: [formulationId], references: [id], onDelete: Cascade)
+
+  addedAt DateTime @default(now())
+
+  @@unique([projectId, formulationId])
+}
+
+model PackagingOption {
+  id          String @id @default(cuid())
+  name        String
+  format      String?   // Bottle, Tube, Jar, Sachet, etc.
+  material    String?   // PET, Glass, Aluminium, PCR, etc.
+  moq         Int?
+  unitCost    Float?
+  leadTime    String?   // "4-6 weeks"
+  status      String @default("Available")  // Available, Limited, Coming Soon
+  description String?
+  teamId      String?
+
+  team    Team? @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  uploads Upload[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SampleOrder {
+  id              String @id @default(cuid())
+  reference       String @unique               // SMP-0001
+  formulationId   String
+  projectId       String?
+  quantity        Int @default(1)
+  format          String?                      // Full-size, Travel, Sachet
+  status          String @default("Pending")   // Pending, In Production, Shipped, Delivered
+  shippingAddress String?
+  notes           String?
+  teamId          String
+  createdById     String
+
+  formulation Formulation @relation(fields: [formulationId], references: [id])
+  project     Project?    @relation(fields: [projectId], references: [id])
+  team        Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  creator     User        @relation("createdSampleOrders", fields: [createdById], references: [id])
+
+  reviews SampleReview[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SampleReview {
+  id            String @id @default(cuid())
+  sampleOrderId String
+  reviewerId    String
+  texture       Int?     // 1-5
+  scent         Int?     // 1-5
+  colour        Int?     // 1-5
+  overall       Int?     // 1-5
+  notes         String?
+
+  sampleOrder SampleOrder @relation(fields: [sampleOrderId], references: [id], onDelete: Cascade)
+  reviewer    User        @relation("sampleReviews", fields: [reviewerId], references: [id])
+
+  uploads Upload[]
+
+  createdAt DateTime @default(now())
+}
+
+model Upload {
+  id           String @id @default(cuid())
+  filename     String
+  path         String
+  mimeType     String?
+  sizeBytes    Int?
+  uploadedById String
+
+  uploader    User             @relation("uploads", fields: [uploadedById], references: [id])
+  reviewId    String?
+  review      SampleReview?    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  packagingId String?
+  packaging   PackagingOption? @relation(fields: [packagingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 }

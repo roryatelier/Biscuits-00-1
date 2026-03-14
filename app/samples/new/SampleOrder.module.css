@@ -456,3 +456,13 @@
 }
 
 .backBtn:hover { border-color: var(--slate-400); color: var(--black-500); }
+
+@media (max-width: 768px) {
+  .progressBar { padding: 16px 16px; }
+  .stepLabel { display: none; }
+  .stepLine { width: 20px; margin: 0 4px; }
+  .content { padding: 32px 16px; }
+  .fieldRow { grid-template-columns: 1fr; }
+  .successPage { padding: 24px 16px; }
+  .successCard { padding: 36px 24px; }
+}

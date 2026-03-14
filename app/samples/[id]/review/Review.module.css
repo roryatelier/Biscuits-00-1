@@ -232,6 +232,14 @@
 }
 .submitBtnDisabled:hover { background: var(--black-500); }
 
+@media (max-width: 768px) {
+  .page { padding: 24px 16px 60px; }
+  .existingScores { grid-template-columns: repeat(2, 1fr); }
+  .ratingCard { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .submitRow { flex-direction: column; }
+  .submitRow > * { width: 100%; text-align: center; }
+}
+
 /* ── Success state ── */
 .successCard {
   display: flex; flex-direction: column; align-items: center;

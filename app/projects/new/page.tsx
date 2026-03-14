@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PlatformLayout from '@/components/PlatformLayout/PlatformLayout';
+import { createProject } from '@/lib/actions/projects';
 import styles from './NewProject.module.css';
 
 const KEY_CLAIMS = [
@@ -18,19 +19,48 @@ export default function NewProjectPage() {
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
-  const [targetConsumer, setTargetConsumer] = useState('');
   const [selectedClaims, setSelectedClaims] = useState<string[]>([]);
-  const [heroIngredients, setHeroIngredients] = useState('');
   const [regulatoryMarket, setRegulatoryMarket] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const toggleClaim = (claim: string) =>
     setSelectedClaims(prev =>
       prev.includes(claim) ? prev.filter(c => c !== claim) : [...prev, claim]
     );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/dashboard');
+    if (!name.trim()) {
+      setError('Project name is required');
+      return;
+    }
+
+    setSubmitting(true);
+    setError('');
+
+    try {
+      const result = await createProject({
+        name: name.trim(),
+        description: description.trim() || undefined,
+        category: category || undefined,
+        market: regulatoryMarket || undefined,
+        claims: selectedClaims.length > 0 ? selectedClaims : undefined,
+      });
+
+      if ('error' in result && result.error) {
+        setError(result.error);
+        setSubmitting(false);
+        return;
+      }
+
+      if ('id' in result && result.id) {
+        router.push(`/projects/${result.id}`);
+      }
+    } catch {
+      setError('Something went wrong. Please try again.');
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -47,9 +77,13 @@ export default function NewProjectPage() {
           </div>
         </div>
 
+        {error && (
+          <p style={{ color: 'var(--red-400)', fontSize: 13, marginBottom: 16 }}>{error}</p>
+        )}
+
         <form className={styles.form} onSubmit={handleSubmit}>
 
-          {/* ── Section 1: Project basics ── */}
+          {/* -- Section 1: Project basics -- */}
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <span className={styles.sectionNum}>01</span>
@@ -74,7 +108,6 @@ export default function NewProjectPage() {
                   className={styles.select}
                   value={category}
                   onChange={e => setCategory(e.target.value)}
-                  required
                 >
                   <option value="">Select category</option>
                   <option>Shampoo</option>
@@ -105,7 +138,7 @@ export default function NewProjectPage() {
             </div>
           </div>
 
-          {/* ── Section 2: Product brief ── */}
+          {/* -- Section 2: Product brief -- */}
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <span className={styles.sectionNum}>02</span>
@@ -113,16 +146,6 @@ export default function NewProjectPage() {
             </div>
 
             <div className={styles.fieldRow}>
-              <div className={styles.field}>
-                <label className={styles.label}>Target consumer</label>
-                <textarea
-                  className={styles.textarea}
-                  placeholder="e.g. Women 25–45 with colour-treated, dry hair. Values clean ingredients and salon-quality results."
-                  rows={3}
-                  value={targetConsumer}
-                  onChange={e => setTargetConsumer(e.target.value)}
-                />
-              </div>
               <div className={styles.field}>
                 <label className={styles.label}>Regulatory market</label>
                 <select
@@ -166,29 +189,15 @@ export default function NewProjectPage() {
                 ))}
               </div>
             </div>
-
-            <div className={styles.field}>
-              <label className={styles.label}>Hero ingredients</label>
-              <input
-                className={styles.input}
-                type="text"
-                placeholder="e.g. Zinc Pyrithione, Salicylic Acid, Panthenol (comma-separated)"
-                value={heroIngredients}
-                onChange={e => setHeroIngredients(e.target.value)}
-              />
-              <p className={styles.helpText}>
-                These will be used to surface matching formulations in the catalog.
-              </p>
-            </div>
           </div>
 
-          {/* ── Actions ── */}
+          {/* -- Actions -- */}
           <div className={styles.actions}>
             <button type="button" className={styles.cancelBtn} onClick={() => router.back()}>
               Cancel
             </button>
-            <button type="submit" className={styles.submitBtn}>
-              Create project →
+            <button type="submit" className={styles.submitBtn} disabled={submitting}>
+              {submitting ? 'Creating...' : 'Create project →'}
             </button>
           </div>
 

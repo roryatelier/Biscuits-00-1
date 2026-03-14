@@ -1,95 +1,111 @@
-'use client';
-
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import PlatformLayout from '@/components/PlatformLayout/PlatformLayout';
+import { getProject } from '@/lib/actions/projects';
 import styles from './ProjectDetail.module.css';
+import ProjectMilestones from './ProjectMilestones';
+
+const STATUS_ORDER = ['Brief', 'In Development', 'Sampling', 'Launched'];
 
 interface Milestone {
   id: string;
   name: string;
   status: 'completed' | 'active' | 'upcoming';
-  date: string;
-  owner: string;
-  notes: string;
 }
 
-const PROJECT = {
-  name: 'Anti-Dandruff Shampoo Innovation',
-  category: 'Shampoo',
-  status: 'In Development',
-  owner: 'Rory G.',
-  created: '15 Oct 2025',
-  formulas: 3,
-  samples: 2,
-  team: [
-    { name: 'Rory G.', role: 'Brand Manager', avatar: 'R' },
-    { name: 'Sara M.', role: 'Formulation Scientist', avatar: 'S' },
-  ],
-};
+function deriveMilestones(projectStatus: string): Milestone[] {
+  const currentIdx = STATUS_ORDER.indexOf(projectStatus);
+  return STATUS_ORDER.map((name, i) => ({
+    id: String(i + 1),
+    name,
+    status: i < currentIdx ? 'completed' as const : i === currentIdx ? 'active' as const : 'upcoming' as const,
+  }));
+}
 
-const MILESTONES: Milestone[] = [
-  { id: '1', name: 'Brief Lock',      status: 'completed', date: '22 Oct 2025', owner: 'Rory G.', notes: 'Product brief finalized with target claims and regulatory markets.' },
-  { id: '2', name: 'Formula Selection', status: 'completed', date: '15 Nov 2025', owner: 'Sara M.', notes: 'Base formulation selected from catalog. Zinc Pyrithione + Niacinamide combination.' },
-  { id: '3', name: 'Sample Review',   status: 'active',    date: '28 Feb 2026', owner: 'Rory G.', notes: 'First sample batch (SMP-0012) in production. Sensory testing planned.' },
-  { id: '4', name: 'Final Formula',   status: 'upcoming',  date: 'Mar 2026',    owner: 'Sara M.', notes: 'Final formulation sign-off after sample review feedback.' },
-  { id: '5', name: 'Packaging Lock',  status: 'upcoming',  date: 'Apr 2026',    owner: 'Rory G.', notes: 'Artwork approval and packaging production kick-off.' },
-  { id: '6', name: 'Launch',          status: 'upcoming',  date: 'Jun 2026',    owner: 'Rory G.', notes: 'Market launch — UK market first, EU to follow.' },
-];
+export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const project = await getProject(id);
 
-const GANTT_PHASES = [
-  { name: 'Scoping',     start: 0, width: 15, color: 'var(--green-300)' },
-  { name: 'Development', start: 15, width: 30, color: 'var(--brand-300)' },
-  { name: 'Testing',     start: 45, width: 20, color: 'var(--orange-300)' },
-  { name: 'Packaging',   start: 55, width: 15, color: 'var(--purple-200)' },
-  { name: 'Launch Prep', start: 70, width: 30, color: 'var(--green-200)' },
-];
+  if (!project) notFound();
 
-const MONTHS = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+  const milestones = deriveMilestones(project.status);
+  const completedCount = milestones.filter(m => m.status === 'completed').length;
+  const progress = Math.round((completedCount / milestones.length) * 100);
 
-export default function ProjectDetailPage() {
-  const router = useRouter();
-  const [selectedMilestone, setSelectedMilestone] = useState<string | null>(null);
+  const claims: string[] = project.claims ? (() => { try { return JSON.parse(project.claims); } catch { return []; } })() : [];
 
-  const completedCount = MILESTONES.filter(m => m.status === 'completed').length;
-  const progress = Math.round((completedCount / MILESTONES.length) * 100);
+  const createdDate = project.createdAt.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 
   return (
     <PlatformLayout>
       <div className={styles.page}>
 
-        {/* ── Breadcrumb ── */}
+        {/* -- Breadcrumb -- */}
         <div className={styles.breadcrumb}>
-          <button onClick={() => router.push('/dashboard')} className={styles.breadLink}>Dashboard</button>
+          <Link href="/projects" className={styles.breadLink}>Projects</Link>
           <span className={styles.breadSep}>›</span>
-          <span>{PROJECT.name}</span>
+          <span>{project.name}</span>
         </div>
 
-        {/* ── Header ── */}
+        {/* -- Header -- */}
         <div className={styles.header}>
           <div className={styles.headerLeft}>
             <div className={styles.headerMeta}>
-              <span className={styles.statusBadge}>{PROJECT.status}</span>
-              <span className={styles.categoryTag}>{PROJECT.category}</span>
+              <span className={styles.statusBadge}>{project.status}</span>
+              {project.category && <span className={styles.categoryTag}>{project.category}</span>}
             </div>
-            <h1 className={styles.title}>{PROJECT.name}</h1>
+            <h1 className={styles.title}>{project.name}</h1>
             <p className={styles.subtitle}>
-              Created {PROJECT.created} · {PROJECT.formulas} formulas · {PROJECT.samples} sample orders
+              Created {createdDate} · {project.formulations.length} formula{project.formulations.length !== 1 ? 's' : ''} · {project.sampleOrders.length} sample order{project.sampleOrders.length !== 1 ? 's' : ''}
             </p>
           </div>
           <div className={styles.headerRight}>
-            <div className={styles.teamAvatars}>
-              {PROJECT.team.map(t => (
-                <div key={t.name} className={styles.avatar} title={`${t.name} — ${t.role}`}>
-                  {t.avatar}
+            {project.creator && (
+              <div className={styles.teamAvatars}>
+                <div className={styles.avatar} title={`${project.creator.name} — Creator`}>
+                  {project.creator.name?.charAt(0) ?? '?'}
                 </div>
-              ))}
-            </div>
-            <button className={styles.actionBtn} onClick={() => router.push('/projects/new')}>Edit project</button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* ── Progress bar ── */}
+        {/* -- Description & details -- */}
+        {(project.description || project.market || claims.length > 0) && (
+          <div className={styles.progressSection} style={{ marginBottom: 24 }}>
+            {project.description && (
+              <div style={{ marginBottom: project.market || claims.length > 0 ? 16 : 0 }}>
+                <p className={styles.progressLabel} style={{ marginBottom: 6 }}>Description</p>
+                <p style={{ fontSize: 13, color: 'var(--slate-500)', lineHeight: 1.6 }}>{project.description}</p>
+              </div>
+            )}
+            {project.market && (
+              <div style={{ marginBottom: claims.length > 0 ? 16 : 0 }}>
+                <p className={styles.progressLabel} style={{ marginBottom: 4 }}>Market</p>
+                <p style={{ fontSize: 13, color: 'var(--slate-500)' }}>{project.market}</p>
+              </div>
+            )}
+            {claims.length > 0 && (
+              <div>
+                <p className={styles.progressLabel} style={{ marginBottom: 8 }}>Claims</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {claims.map((c: string) => (
+                    <span key={c} style={{
+                      fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-xl)',
+                      background: 'var(--brand-100)', color: 'var(--brand-400)', fontWeight: 500,
+                    }}>{c}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* -- Progress bar -- */}
         <div className={styles.progressSection}>
           <div className={styles.progressHeader}>
             <span className={styles.progressLabel}>Project progress</span>
@@ -98,86 +114,88 @@ export default function ProjectDetailPage() {
           <div className={styles.progressBar}>
             <div className={styles.progressFill} style={{ width: `${progress}%` }} />
           </div>
-          <p className={styles.progressSub}>{completedCount} of {MILESTONES.length} milestones completed</p>
+          <p className={styles.progressSub}>{completedCount} of {milestones.length} milestones completed</p>
         </div>
 
-        {/* ── Gantt chart ── */}
-        <div className={styles.ganttSection}>
-          <h2 className={styles.sectionTitle}>Timeline</h2>
-          <div className={styles.ganttChart}>
-            {/* Month headers */}
-            <div className={styles.ganttMonths}>
-              {MONTHS.map((m, i) => (
-                <div key={m} className={styles.ganttMonth}>
-                  <span>{m}</span>
-                  {i < MONTHS.length - 1 && <div className={styles.ganttMonthLine} />}
-                </div>
-              ))}
-            </div>
+        {/* -- Milestones (client component for expand/collapse) -- */}
+        <ProjectMilestones milestones={milestones} />
 
-            {/* Phase bars */}
-            <div className={styles.ganttBars}>
-              {GANTT_PHASES.map(phase => (
-                <div key={phase.name} className={styles.ganttRow}>
-                  <span className={styles.ganttPhaseLabel}>{phase.name}</span>
-                  <div className={styles.ganttTrack}>
-                    <div
-                      className={styles.ganttBar}
-                      style={{
-                        left: `${phase.start}%`,
-                        width: `${phase.width}%`,
-                        background: phase.color,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Today marker */}
-            <div className={styles.ganttToday} style={{ left: `calc(${(4.5 / 9) * 100}% + 100px)` }}>
-              <div className={styles.ganttTodayLine} />
-              <span className={styles.ganttTodayLabel}>Today</span>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Milestones ── */}
+        {/* -- Formulations -- */}
         <div className={styles.milestonesSection}>
-          <h2 className={styles.sectionTitle}>Milestones</h2>
-          <div className={styles.milestoneList}>
-            {MILESTONES.map((m, i) => (
-              <div
-                key={m.id}
-                className={`${styles.milestoneCard} ${styles[`milestone${m.status.charAt(0).toUpperCase() + m.status.slice(1)}`]}`}
-                onClick={() => setSelectedMilestone(selectedMilestone === m.id ? null : m.id)}
-              >
-                <div className={styles.milestoneHeader}>
-                  <div className={styles.milestoneLeft}>
-                    <div className={styles.milestoneIcon}>
-                      {m.status === 'completed' && <span className={styles.checkIcon}>✓</span>}
-                      {m.status === 'active' && <span className={styles.activeIcon} />}
-                      {m.status === 'upcoming' && <span className={styles.upcomingIcon}>{i + 1}</span>}
-                    </div>
-                    <div>
-                      <p className={styles.milestoneName}>{m.name}</p>
-                      <p className={styles.milestoneMeta}>{m.date} · {m.owner}</p>
-                    </div>
-                  </div>
-                  <span className={`${styles.milestoneBadge} ${styles[`badge${m.status.charAt(0).toUpperCase() + m.status.slice(1)}`]}`}>
-                    {m.status === 'completed' && 'Done'}
-                    {m.status === 'active' && 'In Progress'}
-                    {m.status === 'upcoming' && 'Upcoming'}
-                  </span>
-                </div>
-                {selectedMilestone === m.id && (
-                  <div className={styles.milestoneDetail}>
-                    <p>{m.notes}</p>
-                  </div>
-                )}
+          <h2 className={styles.sectionTitle}>Formulations ({project.formulations.length})</h2>
+          {project.formulations.length === 0 ? (
+            <div className={styles.milestoneCard}>
+              <div className={styles.milestoneHeader}>
+                <p style={{ fontSize: 13, color: 'var(--slate-400)' }}>No formulations linked to this project yet.</p>
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className={styles.milestoneList}>
+              {project.formulations.map((pf) => (
+                <Link
+                  key={pf.formulation.id}
+                  href={`/formulations/${pf.formulation.id}`}
+                  className={styles.milestoneCard}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <div className={styles.milestoneHeader}>
+                    <div className={styles.milestoneLeft}>
+                      <div>
+                        <p className={styles.milestoneName}>{pf.formulation.name}</p>
+                        <p className={styles.milestoneMeta}>
+                          {pf.formulation.category && `${pf.formulation.category} · `}v{pf.formulation.version} · {pf.formulation.status}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* -- Sample Orders -- */}
+        <div className={styles.milestonesSection}>
+          <h2 className={styles.sectionTitle}>Sample Orders ({project.sampleOrders.length})</h2>
+          {project.sampleOrders.length === 0 ? (
+            <div className={styles.milestoneCard}>
+              <div className={styles.milestoneHeader}>
+                <p style={{ fontSize: 13, color: 'var(--slate-400)' }}>No sample orders for this project yet.</p>
+              </div>
+            </div>
+          ) : (
+            <div className={styles.milestoneList}>
+              {project.sampleOrders.map((so) => (
+                <Link
+                  key={so.id}
+                  href={`/samples/${so.id}`}
+                  className={styles.milestoneCard}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <div className={styles.milestoneHeader}>
+                    <div className={styles.milestoneLeft}>
+                      <div>
+                        <p className={styles.milestoneName}>
+                          {so.formulation?.name ?? 'Unknown formulation'}
+                        </p>
+                        <p className={styles.milestoneMeta}>
+                          {so.reference} · {so.status}
+                          {so.reviews.length > 0 && ` · ${so.reviews.length} review${so.reviews.length !== 1 ? 's' : ''}`}
+                        </p>
+                      </div>
+                    </div>
+                    <span className={`${styles.milestoneBadge} ${
+                      so.status === 'Delivered' ? styles.badgeCompleted :
+                      so.status === 'Pending' ? styles.badgeUpcoming :
+                      styles.badgeActive
+                    }`}>
+                      {so.status}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
       </div>

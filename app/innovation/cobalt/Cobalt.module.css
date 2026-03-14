@@ -114,3 +114,8 @@
   color: var(--black-500);
   line-height: 1.4;
 }
+
+@media (max-width: 768px) {
+  .heading { font-size: 22px; }
+  .suggestions { grid-template-columns: 1fr; }
+}

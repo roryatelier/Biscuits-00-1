@@ -175,3 +175,13 @@
 }
 
 .milestoneDetail p { font-size: 13px; color: var(--slate-500); line-height: 1.6; }
+
+@media (max-width: 768px) {
+  .page { padding: 24px 16px 60px; }
+  .header { flex-direction: column; gap: 16px; }
+  .headerRight { width: 100%; justify-content: flex-start; }
+  .ganttMonths { padding-left: 60px; }
+  .ganttPhaseLabel { width: 60px; font-size: 11px; }
+  .milestoneHeader { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .milestoneDetail { padding-left: 20px; }
+}
