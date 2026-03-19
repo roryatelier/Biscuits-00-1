@@ -7,12 +7,17 @@ import {
   PackagingIcon,
   SampleOrderIcon,
   GreenCheckCircleIcon,
+  SidebarOpenIcon,
 } from '../icons/Icons';
 
 type CardId = 'formulation' | 'packaging' | 'sampleOrder';
 
-export default function RightPanel() {
-  const [openCard, setOpenCard] = useState<CardId | null>('sampleOrder'); // open by default
+interface RightPanelProps {
+  onCollapse?: () => void;
+}
+
+export default function RightPanel({ onCollapse }: RightPanelProps) {
+  const [openCard, setOpenCard] = useState<CardId | null>('sampleOrder');
 
   const toggleCard = (id: CardId) => {
     setOpenCard(openCard === id ? null : id);
@@ -24,9 +29,21 @@ export default function RightPanel() {
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerTop}>
-          <h2 className={styles.panelTitle}>Project Selections</h2>
+          <div className={styles.headerLeft}>
+            {onCollapse && (
+              <button
+                className={styles.collapseBtn}
+                onClick={onCollapse}
+                type="button"
+                aria-label="Collapse product brief panel"
+              >
+                <SidebarOpenIcon />
+              </button>
+            )}
+            <h2 className={styles.panelTitle}>Product Brief</h2>
+          </div>
           <button className={styles.specsBtn} disabled>
-            View detailed specs
+            Preview brief
           </button>
         </div>
       </div>
@@ -45,7 +62,7 @@ export default function RightPanel() {
           </div>
           <div className={`${styles.cardContent} ${openCard === 'formulation' ? styles.open : ''}`}>
             <div className={styles.orderDetail}>
-              <p style={{ fontSize: 13, color: 'var(--slate-500)', padding: '12px 0' }}>
+              <p className={styles.placeholderText}>
                 Formulation details will appear here once you begin chatting.
               </p>
             </div>
@@ -63,7 +80,7 @@ export default function RightPanel() {
           </div>
           <div className={`${styles.cardContent} ${openCard === 'packaging' ? styles.open : ''}`}>
             <div className={styles.orderDetail}>
-              <p style={{ fontSize: 13, color: 'var(--slate-500)', padding: '12px 0' }}>
+              <p className={styles.placeholderText}>
                 Packaging options will appear here once you begin chatting.
               </p>
             </div>

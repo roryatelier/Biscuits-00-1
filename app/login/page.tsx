@@ -60,9 +60,13 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className={styles.link}>
-          Don&apos;t have an account? <Link href="/register">Sign up</Link>
-        </p>
+        <div className={styles.divider}>
+          <span>or</span>
+        </div>
+
+        <Link href="/register" className={styles.signupBtn}>
+          Create an account
+        </Link>
 
         <p className={styles.footnote}>Platform01 · The future of manufacturing</p>
       </div>

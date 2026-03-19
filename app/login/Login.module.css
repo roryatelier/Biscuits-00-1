@@ -94,20 +94,42 @@
   text-align: center;
 }
 
-.link {
-  font-size: 13px;
-  color: var(--slate-500);
-  text-align: center;
+.divider {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--slate-400);
+  font-size: 12px;
 }
 
-.link a {
-  color: var(--brand-500, #6366f1);
-  text-decoration: none;
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--slate-300);
+}
+
+.signupBtn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: var(--white-500);
+  color: var(--black-500);
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-md);
+  font-size: 14px;
   font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.link a:hover {
-  text-decoration: underline;
+.signupBtn:hover {
+  border-color: var(--slate-400);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .submitBtn:disabled {

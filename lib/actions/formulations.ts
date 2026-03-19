@@ -1,7 +1,7 @@
 'use server';
 
-import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { getAuthContext } from '@/lib/actions/context';
 
 export async function listFormulations(filters?: {
   category?: string;
@@ -9,10 +9,10 @@ export async function listFormulations(filters?: {
   market?: string;
   search?: string;
 }) {
-  const session = await auth();
-  if (!session?.user?.id) return [];
+  const ctx = await getAuthContext();
+  if (!ctx) return [];
 
-  const where: Record<string, unknown> = {};
+  const where: Record<string, unknown> = { teamId: ctx.teamId };
   if (filters?.category) where.category = filters.category;
   if (filters?.status) where.status = filters.status;
   if (filters?.market) where.market = filters.market;
@@ -33,11 +33,11 @@ export async function listFormulations(filters?: {
 }
 
 export async function getFormulation(id: string) {
-  const session = await auth();
-  if (!session?.user?.id) return null;
+  const ctx = await getAuthContext();
+  if (!ctx) return null;
 
   return prisma.formulation.findFirst({
-    where: { id },
+    where: { id, teamId: ctx.teamId },
     include: {
       creator: { select: { name: true } },
       ingredients: {
@@ -54,10 +54,11 @@ export async function getFormulation(id: string) {
 }
 
 export async function getFormulationCategories() {
-  const session = await auth();
-  if (!session?.user?.id) return [];
+  const ctx = await getAuthContext();
+  if (!ctx) return [];
 
   const formulations = await prisma.formulation.findMany({
+    where: { teamId: ctx.teamId },
     select: { category: true },
     distinct: ['category'],
   });

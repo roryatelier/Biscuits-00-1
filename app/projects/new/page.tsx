@@ -6,6 +6,18 @@ import PlatformLayout from '@/components/PlatformLayout/PlatformLayout';
 import { createProject } from '@/lib/actions/projects';
 import styles from './NewProject.module.css';
 
+const REGULATORY_MARKETS = [
+  { value: 'uk', label: 'United Kingdom' },
+  { value: 'eu', label: 'European Union' },
+  { value: 'us', label: 'United States' },
+  { value: 'ca', label: 'Canada' },
+  { value: 'au', label: 'Australia' },
+  { value: 'jp', label: 'Japan' },
+  { value: 'cn', label: 'China' },
+  { value: 'kr', label: 'South Korea' },
+  { value: 'global', label: 'Global' },
+];
+
 const KEY_CLAIMS = [
   'Anti-dandruff', 'Moisturising', 'Strengthening', 'Brightening',
   'Soothing', 'Repairing', 'Volumising', 'Anti-ageing',
@@ -20,9 +32,14 @@ export default function NewProjectPage() {
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [selectedClaims, setSelectedClaims] = useState<string[]>([]);
-  const [regulatoryMarket, setRegulatoryMarket] = useState('');
+  const [regulatoryMarkets, setRegulatoryMarkets] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  const toggleMarket = (market: string) =>
+    setRegulatoryMarkets(prev =>
+      prev.includes(market) ? prev.filter(m => m !== market) : [...prev, market]
+    );
 
   const toggleClaim = (claim: string) =>
     setSelectedClaims(prev =>
@@ -44,7 +61,7 @@ export default function NewProjectPage() {
         name: name.trim(),
         description: description.trim() || undefined,
         category: category || undefined,
-        market: regulatoryMarket || undefined,
+        market: regulatoryMarkets.length > 0 ? regulatoryMarkets.join(',') : undefined,
         claims: selectedClaims.length > 0 ? selectedClaims : undefined,
       });
 
@@ -145,28 +162,23 @@ export default function NewProjectPage() {
               <h2 className={styles.sectionTitle}>Product brief</h2>
             </div>
 
-            <div className={styles.fieldRow}>
-              <div className={styles.field}>
-                <label className={styles.label}>Regulatory market</label>
-                <select
-                  className={styles.select}
-                  value={regulatoryMarket}
-                  onChange={e => setRegulatoryMarket(e.target.value)}
-                >
-                  <option value="">Select market</option>
-                  <option value="uk">United Kingdom</option>
-                  <option value="eu">European Union</option>
-                  <option value="us">United States</option>
-                  <option value="ca">Canada</option>
-                  <option value="au">Australia</option>
-                  <option value="jp">Japan</option>
-                  <option value="cn">China</option>
-                  <option value="kr">South Korea</option>
-                  <option value="global">Global</option>
-                </select>
-                <p className={styles.helpText}>
-                  Determines which regulatory flags apply to ingredients.
-                </p>
+            <div className={styles.field}>
+              <label className={styles.label}>Regulatory market</label>
+              <p className={styles.helpText} style={{ marginBottom: 10 }}>
+                Select all markets this product will be sold in. Determines which regulatory flags apply.
+              </p>
+              <div className={styles.claimGrid}>
+                {REGULATORY_MARKETS.map(market => (
+                  <button
+                    key={market.value}
+                    type="button"
+                    className={`${styles.claimChip} ${regulatoryMarkets.includes(market.value) ? styles.claimActive : ''}`}
+                    onClick={() => toggleMarket(market.value)}
+                  >
+                    {regulatoryMarkets.includes(market.value) && <span className={styles.chipCheck}>✓</span>}
+                    {market.label}
+                  </button>
+                ))}
               </div>
             </div>
 

@@ -1,0 +1,638 @@
+.page {
+  padding: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Caution banner */
+.cautionBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #92400e;
+}
+
+.cautionBannerIcon {
+  font-size: 16px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.headerLeft {
+  flex: 1;
+}
+
+.backBtn {
+  display: inline-block;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+.backBtn:hover {
+  color: #111;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stageBadge {
+  display: inline-block;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 4px;
+}
+
+.permissionBadge {
+  display: inline-block;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 4px;
+}
+
+.headerActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.cautionBtn {
+  padding: 8px 14px;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  background: #fff;
+  color: #666;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.cautionBtn:hover {
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.cautionBtnActive {
+  padding: 8px 14px;
+  border: 1px solid #f59e0b;
+  border-radius: 6px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.transitionSelect {
+  padding: 8px 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+}
+
+.transitionSelect:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid #e5e5e5;
+  margin-bottom: 24px;
+}
+
+.tab {
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #888;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tab:hover {
+  color: #111;
+}
+
+.tabActive {
+  color: #111;
+  font-weight: 600;
+  border-bottom-color: #111;
+}
+
+/* Content */
+.content {
+  min-height: 300px;
+}
+
+/* Overview grid */
+.overviewGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.infoCard {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.infoCardTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 16px;
+}
+
+.infoRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.infoRow:last-child {
+  border-bottom: none;
+}
+
+.infoLabel {
+  font-size: 13px;
+  color: #888;
+  flex-shrink: 0;
+  margin-right: 12px;
+}
+
+.infoValue {
+  font-size: 14px;
+  color: #333;
+  text-align: right;
+}
+
+.emptyValue {
+  font-size: 13px;
+  color: #bbb;
+  padding: 12px 0;
+}
+
+.chips {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.chip {
+  display: inline-block;
+  background: #f0f0f0;
+  color: #555;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.capabilityBadge {
+  display: inline-block;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 4px;
+}
+
+.cobaltBadge {
+  display: inline-block;
+  background: #dbeafe;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 4px;
+}
+
+/* Section */
+.section {
+  margin-bottom: 24px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111;
+}
+
+.addBtn {
+  padding: 8px 14px;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.addBtn:hover {
+  background: #333;
+}
+
+/* Add form */
+.addForm {
+  display: flex;
+  gap: 10px;
+  padding: 16px;
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.formSelect {
+  padding: 8px 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+  outline: none;
+}
+
+.formInput {
+  padding: 8px 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+}
+
+.formInput:focus,
+.formSelect:focus {
+  border-color: #111;
+}
+
+.submitBtn {
+  padding: 8px 16px;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submitBtn:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+/* Tables */
+.tableWrapper {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.th {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #fafafa;
+}
+
+.tableRow {
+  transition: background 0.1s;
+}
+
+.tableRow:hover {
+  background: #fafafa;
+}
+
+.td {
+  font-size: 14px;
+  color: #333;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+.certType {
+  font-weight: 600;
+  color: #111;
+}
+
+.inlineSelect {
+  padding: 4px 8px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  font-size: 12px;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+}
+
+.inlineSelect:disabled {
+  opacity: 0.6;
+}
+
+.removeBtn {
+  padding: 4px 10px;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  background: #fff;
+  color: #ef4444;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.removeBtn:hover {
+  background: #fef2f2;
+}
+
+.removeBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Status pills */
+.statusPill {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 4px;
+}
+
+.status_draft {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.status_sent {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.status_signed {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status_expired {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+/* Brief assignments */
+.briefList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.briefCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.briefCard:hover {
+  border-color: #111;
+}
+
+.briefInfo {
+  flex: 1;
+}
+
+.briefName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 4px;
+}
+
+.briefMeta {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 2px;
+}
+
+.matchScore {
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+
+.scoreBadge {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+
+.scoreHigh {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.scoreMed {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.scoreLow {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.scoreNA {
+  font-size: 13px;
+  color: #bbb;
+}
+
+/* Activity Timeline */
+.activityTimeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.activityItem {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.activityItem:last-child {
+  border-bottom: none;
+}
+
+.activityIcon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border-radius: 50%;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.activityContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.activityDesc {
+  font-size: 13px;
+  color: #333;
+  line-height: 1.4;
+  margin-bottom: 2px;
+}
+
+.activityMeta {
+  font-size: 11px;
+  color: #999;
+}
+
+/* Add Activity Form */
+.formRow {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.formField {
+  flex: 1;
+  margin-bottom: 8px;
+}
+
+.formLabel {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.formSelect {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  font-size: 13px;
+  background: #fff;
+}
+
+.formInput {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.formTextarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  font-size: 13px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.formSelect:focus,
+.formInput:focus,
+.formTextarea:focus {
+  outline: none;
+  border-color: #111;
+}
+
+.saveBtn {
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.saveBtn:hover { background: #333; }
+.saveBtn:disabled { background: #ccc; cursor: not-allowed; }

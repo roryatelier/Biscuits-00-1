@@ -47,9 +47,23 @@ export default async function ProjectsPage() {
                 </div>
                 <p className={styles.cardName}>{p.name}</p>
                 {p.market && <p className={styles.cardMarket}>Market: {p.market}</p>}
-                <div className={styles.cardStats}>
-                  <span>{p.formulations.length} formula{p.formulations.length !== 1 ? 's' : ''}</span>
-                  <span>{p.sampleOrders.length} sample{p.sampleOrders.length !== 1 ? 's' : ''}</span>
+                <div className={styles.cardFooter}>
+                  <div className={styles.cardStats}>
+                    <span>{p.formulations.length} formula{p.formulations.length !== 1 ? 's' : ''}</span>
+                    <span>{p.sampleOrders.length} sample{p.sampleOrders.length !== 1 ? 's' : ''}</span>
+                  </div>
+                  {p.assignments && p.assignments.length > 0 && (
+                    <div className={styles.cardAvatars}>
+                      {p.assignments.slice(0, 3).map((a) => (
+                        <div key={a.user.id} className={styles.cardAvatar} title={`${a.user.name}${a.role === 'lead' ? ' (Lead)' : ''}`}>
+                          {(a.user.name || '?').charAt(0).toUpperCase()}
+                        </div>
+                      ))}
+                      {p.assignments.length > 3 && (
+                        <div className={styles.cardAvatarMore}>+{p.assignments.length - 3}</div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </Link>
             ))}

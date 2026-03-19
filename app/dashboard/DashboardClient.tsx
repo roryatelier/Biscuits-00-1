@@ -58,13 +58,8 @@ export default function DashboardClient({
     <>
       {/* -- Header -- */}
       <div className={styles.header}>
-        <div>
-          <h1 className={styles.greeting}>Hello, {userName}.</h1>
-          <p className={styles.date}>{today}</p>
-        </div>
-        <button className={styles.newProjectBtn} onClick={() => router.push('/projects/new')}>
-          + New project
-        </button>
+        <h1 className={styles.greeting}>Hello, {userName}.</h1>
+        <p className={styles.date}>{today}</p>
       </div>
 
       {/* -- Team invite banner -- */}

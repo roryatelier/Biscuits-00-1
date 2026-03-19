@@ -1,0 +1,283 @@
+.page {
+  padding: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.pageSubtitle {
+  font-size: 13px;
+  color: #888;
+}
+
+/* Metric cards */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metricCard {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.metricValue {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 4px;
+}
+
+.metricLabel {
+  font-size: 13px;
+  color: #888;
+}
+
+/* Nav cards */
+.navCards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.navCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s;
+}
+
+.navCard:hover {
+  border-color: #111;
+}
+
+.navIcon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.navCardTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 2px;
+}
+
+.navCardDesc {
+  font-size: 12px;
+  color: #888;
+}
+
+.navArrow {
+  margin-left: auto;
+  color: #888;
+  font-size: 14px;
+}
+
+/* Grid row */
+.gridRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.cardTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 16px;
+}
+
+/* Funnel */
+.funnel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.funnelRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.funnelLabel {
+  font-size: 13px;
+  color: #555;
+  width: 160px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.funnelBarTrack {
+  flex: 1;
+  height: 20px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.funnelBar {
+  height: 100%;
+  border-radius: 4px;
+  min-width: 2px;
+  transition: width 0.3s ease;
+}
+
+.funnelCount {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  width: 32px;
+  text-align: right;
+}
+
+/* Coverage table */
+.coverageTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.coverageTh {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.coverageRow:hover {
+  background: #fafafa;
+}
+
+.coverageTd {
+  font-size: 14px;
+  color: #333;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.qualifiedCount {
+  display: inline-block;
+  background: #dcfce7;
+  color: #16a34a;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.emptyText {
+  font-size: 13px;
+  color: #888;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* Network Coverage Heatmap */
+.heatmapSection {
+  margin-top: 16px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.heatmapWrapper {
+  overflow-x: auto;
+}
+
+.heatmapTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.heatmapTh {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.heatmapThCountry {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: center;
+  padding: 8px 8px;
+  border-bottom: 1px solid #e5e5e5;
+  min-width: 48px;
+}
+
+.heatmapCategory {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  white-space: nowrap;
+}
+
+.heatmapCell {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.heatmapCellRed {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.heatmapCellAmber {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.heatmapCellGreen {
+  background: #f0fdf4;
+  color: #16a34a;
+}

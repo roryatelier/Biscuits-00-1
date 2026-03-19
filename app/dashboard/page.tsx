@@ -22,17 +22,7 @@ const ORDER_COLORS: Record<string, string> = {
   'Delivered': 'orderDelivered',
 };
 
-function timeAgo(date: Date): string {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 60) return `${diffMins} min${diffMins !== 1 ? 's' : ''} ago`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
-  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-}
+import { timeAgo } from '@/lib/utils/timeAgo';
 
 export default async function DashboardPage() {
   const [projects, sampleOrders] = await Promise.all([

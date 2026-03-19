@@ -29,6 +29,34 @@
   gap: 12px;
 }
 
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.collapseBtn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--slate-400);
+  transition: background 0.15s, color 0.15s;
+}
+
+.collapseBtn:hover {
+  background: var(--slate-100);
+  color: var(--black-500);
+}
+
+.collapseBtn svg {
+  width: 18px;
+  height: 18px;
+}
+
 .panelTitle {
   font-size: 15px;
   font-weight: 600;
@@ -48,6 +76,12 @@
   cursor: not-allowed;
   background: transparent;
   white-space: nowrap;
+}
+
+.placeholderText {
+  font-size: 13px;
+  color: var(--slate-500);
+  padding: 12px 0;
 }
 
 /* Selection cards wrapper */

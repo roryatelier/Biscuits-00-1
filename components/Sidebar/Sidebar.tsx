@@ -10,11 +10,10 @@ import {
   HomeIcon,
   SparkleIcon,
   LocationPinIcon,
-  CheckmarkIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   FormulationIcon,
-  PackagingIcon,
+  DocumentsIcon,
   TeamIcon,
   SettingsIcon,
 } from '../icons/Icons';
@@ -33,8 +32,7 @@ export default function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProp
   const userInitial = userName.charAt(0).toUpperCase();
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [sampleTrackingOpen, setSampleTrackingOpen] = useState(false);
-  const [projectDocsOpen, setProjectDocsOpen] = useState(false);
-  const [brandDocsOpen, setBrandDocsOpen] = useState(true);
+  const [supplierIntelOpen, setSupplierIntelOpen] = useState(false);
 
   const nav = (path: string) => { router.push(path); onNavigate?.(); };
 
@@ -43,13 +41,14 @@ export default function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProp
   return (
     <div className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''}`}>
 
-      <button className={styles.toggleBtn} onClick={onToggle} title="Close sidebar" aria-label="Toggle sidebar">
-        ‹
-      </button>
-
-      {/* ATELIER Logo */}
-      <div className={styles.logo}>
-        <AtelierLogo />
+      {/* Logo row */}
+      <div className={styles.logoRow}>
+        <div className={styles.logo}>
+          <AtelierLogo />
+        </div>
+        <button className={styles.toggleBtn} onClick={onToggle} title="Close sidebar" aria-label="Toggle sidebar">
+          ‹
+        </button>
       </div>
 
       {/* Scrollable content */}
@@ -182,17 +181,89 @@ export default function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProp
             </div>
           </div>
 
-          {/* Approved Innovations */}
+          {/* Supplier Intelligence */}
+          <div className={styles.dropdown}>
+            <div
+              className={`${styles.dropdownHeader} ${supplierIntelOpen ? styles.active : ''}`}
+              onClick={() => setSupplierIntelOpen(!supplierIntelOpen)}
+              role="button"
+              tabIndex={0}
+              aria-expanded={supplierIntelOpen}
+              onKeyDown={e => e.key === 'Enter' && setSupplierIntelOpen(!supplierIntelOpen)}
+            >
+              <div className={styles.dropdownHeaderLeft}>
+                <LocationPinIcon />
+                <p className={styles.navLabel}>Suppliers</p>
+              </div>
+              {supplierIntelOpen
+                ? <ChevronUpIcon className={styles.chevron} />
+                : <ChevronDownIcon className={styles.chevron} />}
+            </div>
+            <div className={`${styles.dropdownContent} ${supplierIntelOpen ? styles.open : ''}`}>
+              <div className={styles.optionsList}>
+                <p
+                  className={`${styles.optionItem} ${pathname === '/suppliers' ? styles.active : ''}`}
+                  onClick={() => nav('/suppliers')}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={e => e.key === 'Enter' && nav('/suppliers')}
+                >
+                  Dashboard
+                </p>
+                <p
+                  className={`${styles.optionItem} ${isActive('/suppliers/pipeline') ? styles.active : ''}`}
+                  onClick={() => nav('/suppliers/pipeline')}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={e => e.key === 'Enter' && nav('/suppliers/pipeline')}
+                >
+                  Pipeline
+                </p>
+                <p
+                  className={`${styles.optionItem} ${isActive('/suppliers/database') ? styles.active : ''}`}
+                  onClick={() => nav('/suppliers/database')}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={e => e.key === 'Enter' && nav('/suppliers/database')}
+                >
+                  Supplier DB
+                </p>
+                <p
+                  className={`${styles.optionItem} ${isActive('/suppliers/briefs') ? styles.active : ''}`}
+                  onClick={() => nav('/suppliers/briefs')}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={e => e.key === 'Enter' && nav('/suppliers/briefs')}
+                >
+                  Briefs
+                </p>
+                <p
+                  className={`${styles.optionItem} ${isActive('/suppliers/import') ? styles.active : ''}`}
+                  onClick={() => nav('/suppliers/import')}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={e => e.key === 'Enter' && nav('/suppliers/import')}
+                >
+                  Import
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Documents */}
           <div
-            className={`${styles.iconRow} ${isActive('/in-development') ? styles.active : ''}`}
-            onClick={() => nav('/in-development')}
+            className={`${styles.iconRow} ${isActive('/documents') ? styles.active : ''}`}
+            onClick={() => nav('/documents')}
             role="button"
             tabIndex={0}
-            onKeyDown={e => e.key === 'Enter' && nav('/in-development')}
+            onKeyDown={e => e.key === 'Enter' && nav('/documents')}
           >
-            <CheckmarkIcon />
-            <p className={styles.navLabel}>Approved Innovations</p>
+            <DocumentsIcon />
+            <p className={styles.navLabel}>Documents</p>
           </div>
+
+          {/* Divider — separates workflow from admin */}
+          <div className={styles.navDivider} />
 
           {/* Team */}
           <div
@@ -218,65 +289,18 @@ export default function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProp
             <p className={styles.navLabel}>Settings</p>
           </div>
 
-          {/* AI Assistant — coming soon */}
-
         </nav>
-
-        {/* Divider */}
-        <div className={styles.dividerLine} />
-
-        {/* Projects & Brands */}
-        <div className={styles.projectsSection}>
-
-          {/* Project Documents */}
-          <div className={styles.dropdown}>
-            <div className={styles.dropdownHeader} onClick={() => setProjectDocsOpen(!projectDocsOpen)}>
-              <p className={styles.sectionLabel}>Project Documents</p>
-              {projectDocsOpen
-                ? <ChevronUpIcon className={styles.chevron} />
-                : <ChevronDownIcon className={styles.chevron} />}
-            </div>
-            <div className={`${styles.dropdownContent} ${projectDocsOpen ? styles.open : ''}`}>
-              <div className={styles.optionsList}>
-                <p className={styles.optionItem}>Product Brief</p>
-                <p className={styles.optionItem}>Regulatory Notes</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Brand Documents */}
-          <div className={styles.dropdown}>
-            <div className={styles.dropdownHeader} onClick={() => setBrandDocsOpen(!brandDocsOpen)}>
-              <p className={styles.sectionLabel}>Brand Documents</p>
-              {brandDocsOpen
-                ? <ChevronUpIcon className={styles.chevron} />
-                : <ChevronDownIcon className={styles.chevron} />}
-            </div>
-            <div className={`${styles.dropdownContent} ${brandDocsOpen ? styles.open : ''}`}>
-              <div className={styles.brandsWrapper}>
-                <div className={styles.singleBrand}>
-                  <div className={`${styles.brandImgPlaceholder} ${styles.orange}`}>PDF</div>
-                  <p className={styles.brandLabel}>Brand_Guidelines.pdf</p>
-                </div>
-                <div className={styles.singleBrand}>
-                  <div className={`${styles.brandImgPlaceholder} ${styles.pink}`}>PDF</div>
-                  <p className={styles.brandLabel}>Competitor_analysis.pdf</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
 
       </div>
 
       <div className={styles.btnWrapper}>
         <button className={styles.newProjectBtn} onClick={() => { router.push('/projects/new'); onNavigate?.(); }}>
-          New Innovation Project
+          + New Project
         </button>
         <button className={styles.logoutBtn} onClick={() => logoutAction()}>
           Sign out
         </button>
+        <p className={styles.version}>v0.2.0</p>
       </div>
 
     </div>

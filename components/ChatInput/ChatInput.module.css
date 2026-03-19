@@ -80,7 +80,7 @@
 }
 
 .sendBtn:hover {
-  background: #333;
+  background: var(--black-hover);
   transform: scale(1.05);
 }
 
@@ -125,4 +125,53 @@
 .chip:hover {
   background: var(--slate-100);
   border-color: var(--slate-400);
+}
+
+/* Tool chip (selected tool displayed above or inline with input) */
+.toolChipRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 8px;
+}
+
+.toolChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 6px;
+  background: var(--green-100);
+  border: 1px solid var(--green-300);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--green-400);
+  white-space: nowrap;
+}
+
+.toolChipIcon {
+  width: 14px;
+  height: 14px;
+  color: var(--green-400);
+}
+
+.toolChipClose {
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--green-400);
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+
+.toolChipClose:hover {
+  background: var(--green-200);
+}
+
+.toolChipClose svg {
+  width: 10px;
+  height: 10px;
 }

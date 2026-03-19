@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import styles from './Onboarding.module.css';
 import { AtelierLogo } from '@/components/icons/Icons';
 import { completeOnboarding } from '@/lib/actions/auth';
+import { getAuthContext } from '@/lib/actions/context';
 
 const TEMPLATES = [
   { id: 'anti-dandruff', name: 'Anti-Dandruff Shampoo', category: 'shampoo', market: 'uk', icon: '🧴' },
@@ -51,6 +52,15 @@ export default function OnboardingPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [completed, setCompleted] = useState<number[]>([]);
   const [form, setForm] = useState<FormData>(EMPTY_FORM);
+
+  // Redirect invitees to the invited onboarding flow
+  useEffect(() => {
+    getAuthContext().then((ctx) => {
+      if (ctx && ctx.role !== 'admin') {
+        router.replace('/onboarding/invited');
+      }
+    });
+  }, [router]);
 
   // Restore progress from localStorage
   useEffect(() => {

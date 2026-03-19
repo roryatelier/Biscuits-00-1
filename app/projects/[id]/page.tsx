@@ -2,8 +2,17 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import PlatformLayout from '@/components/PlatformLayout/PlatformLayout';
 import { getProject } from '@/lib/actions/projects';
+import { listActivities } from '@/lib/actions/activity';
+import { listComments } from '@/lib/actions/comments';
+import { getAuthContext } from '@/lib/actions/context';
 import styles from './ProjectDetail.module.css';
+import collabStyles from './Collaboration.module.css';
 import ProjectMilestones from './ProjectMilestones';
+import ActivityFeed from './ActivityFeed';
+import Discussion from './Discussion';
+import ShareButton from './ShareButton';
+import DocumentsSection from './DocumentsSection';
+import { listProjectDocuments } from '@/lib/actions/documents';
 
 const STATUS_ORDER = ['Brief', 'In Development', 'Sampling', 'Launched'];
 
@@ -24,7 +33,14 @@ function deriveMilestones(projectStatus: string): Milestone[] {
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const project = await getProject(id);
+
+  const [project, activityResult, comments, ctx, documents] = await Promise.all([
+    getProject(id),
+    listActivities(id, { take: 20, skip: 0 }),
+    listComments('project', id),
+    getAuthContext(),
+    listProjectDocuments(id),
+  ]);
 
   if (!project) notFound();
 
@@ -64,40 +80,51 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             </p>
           </div>
           <div className={styles.headerRight}>
-            {project.creator && (
+            <ShareButton projectId={id} />
+            {/* Assignees */}
+            {project.assignments && project.assignments.length > 0 ? (
+              <div className={collabStyles.assigneesRow}>
+                {project.assignments.map((a) => (
+                  <div key={a.user.id} className={collabStyles.assigneeChip}>
+                    <div className={collabStyles.assigneeChipAvatar}>
+                      {(a.user.name || '?').charAt(0).toUpperCase()}
+                    </div>
+                    <span>{a.user.name || 'Unknown'}</span>
+                    {a.role === 'lead' && <span className={collabStyles.leadBadge}>Lead</span>}
+                  </div>
+                ))}
+              </div>
+            ) : project.creator ? (
               <div className={styles.teamAvatars}>
                 <div className={styles.avatar} title={`${project.creator.name} — Creator`}>
                   {project.creator.name?.charAt(0) ?? '?'}
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
 
         {/* -- Description & details -- */}
         {(project.description || project.market || claims.length > 0) && (
-          <div className={styles.progressSection} style={{ marginBottom: 24 }}>
+          <div className={`${styles.progressSection} ${styles.detailsSection}`}>
             {project.description && (
-              <div style={{ marginBottom: project.market || claims.length > 0 ? 16 : 0 }}>
-                <p className={styles.progressLabel} style={{ marginBottom: 6 }}>Description</p>
-                <p style={{ fontSize: 13, color: 'var(--slate-500)', lineHeight: 1.6 }}>{project.description}</p>
+              <div className={styles.detailBlock}>
+                <p className={styles.detailLabel}>Description</p>
+                <p className={styles.detailText}>{project.description}</p>
               </div>
             )}
             {project.market && (
-              <div style={{ marginBottom: claims.length > 0 ? 16 : 0 }}>
-                <p className={styles.progressLabel} style={{ marginBottom: 4 }}>Market</p>
-                <p style={{ fontSize: 13, color: 'var(--slate-500)' }}>{project.market}</p>
+              <div className={styles.detailBlock}>
+                <p className={styles.detailLabel}>Market</p>
+                <p className={styles.detailText}>{project.market}</p>
               </div>
             )}
             {claims.length > 0 && (
-              <div>
-                <p className={styles.progressLabel} style={{ marginBottom: 8 }}>Claims</p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              <div className={styles.detailBlock}>
+                <p className={styles.detailLabel}>Claims</p>
+                <div className={styles.claimsRow}>
                   {claims.map((c: string) => (
-                    <span key={c} style={{
-                      fontSize: 12, padding: '3px 10px', borderRadius: 'var(--radius-xl)',
-                      background: 'var(--brand-100)', color: 'var(--brand-400)', fontWeight: 500,
-                    }}>{c}</span>
+                    <span key={c} className={styles.claimChip}>{c}</span>
                   ))}
                 </div>
               </div>
@@ -117,7 +144,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           <p className={styles.progressSub}>{completedCount} of {milestones.length} milestones completed</p>
         </div>
 
-        {/* -- Milestones (client component for expand/collapse) -- */}
+        {/* -- Milestones -- */}
         <ProjectMilestones milestones={milestones} />
 
         {/* -- Formulations -- */}
@@ -197,6 +224,28 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             </div>
           )}
         </div>
+
+        {/* -- Documents -- */}
+        <DocumentsSection
+          projectId={id}
+          initialDocuments={documents}
+        />
+
+        {/* -- Discussion (Comments) -- */}
+        <Discussion
+          entityType="project"
+          entityId={id}
+          initialComments={comments}
+          currentUserId={ctx?.userId ?? ''}
+        />
+
+        {/* -- Activity Feed -- */}
+        <ActivityFeed
+          projectId={id}
+          initialActivities={activityResult.activities}
+          initialTotal={activityResult.total}
+          initialHasMore={activityResult.hasMore}
+        />
 
       </div>
     </PlatformLayout>

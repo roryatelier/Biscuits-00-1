@@ -1,0 +1,219 @@
+/* ── Tool Selection Panel ─────────────────────────────── */
+.panel {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-lg);
+  background: var(--white-500);
+  overflow: hidden;
+}
+
+/* Header toggle bar */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+  width: 100%;
+}
+
+.header:hover {
+  background: var(--slate-100);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.headerIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--black-500);
+}
+
+.headerLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--black-500);
+}
+
+.headerCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--slate-400);
+  background: var(--slate-100);
+  border-radius: var(--radius-sm);
+}
+
+.headerChevron {
+  width: 16px;
+  height: 16px;
+  color: var(--slate-400);
+}
+
+/* Body — animated expand/collapse */
+.body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.25s ease;
+}
+
+.bodyOpen {
+  grid-template-rows: 1fr;
+}
+
+.bodyInner {
+  overflow: hidden;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bodyOpen .bodyInner {
+  padding: 8px 16px 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+/* Individual tool card — now a <button> for accessibility */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  min-height: 88px;
+  text-align: left;
+  background: var(--white-500);
+}
+
+.card:hover {
+  border-color: var(--slate-400);
+  background: var(--slate-100);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--brand-400);
+  outline-offset: 2px;
+}
+
+/* Selected tool highlight */
+.cardSelected {
+  border-color: var(--green-400);
+  background: var(--green-100);
+}
+
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.cardName {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--black-500);
+  line-height: 1.3;
+}
+
+.cardArrow {
+  width: 12px;
+  height: 12px;
+  color: var(--slate-400);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.cardDesc {
+  font-size: 11px;
+  color: var(--slate-500);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* "Use tool" button — CSS visibility, animated */
+.useToolBtn {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--white-500);
+  background: var(--green-400);
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s, transform 0.15s, background 0.15s;
+}
+
+.card:hover .useToolBtn,
+.card:focus-visible .useToolBtn {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.useToolBtn:hover {
+  background: var(--black-hover);
+}
+
+/* Show more toggle */
+.showMore {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--slate-400);
+  cursor: pointer;
+  padding: 4px 0;
+  width: fit-content;
+  transition: color 0.15s;
+}
+
+.showMore:hover {
+  color: var(--black-500);
+}
+
+.showMoreChevron {
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+.showMoreChevronUp {
+  transform: rotate(180deg);
+}
+
+/* Responsive: 2 columns on smaller screens */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

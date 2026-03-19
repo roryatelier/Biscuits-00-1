@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Sidebar from '@/components/Sidebar/Sidebar';
 import { SidebarOpenIcon, HamburgerIcon } from '@/components/icons/Icons';
+import NotificationBell from '@/components/NotificationBell/NotificationBell';
 import styles from './PlatformLayout.module.css';
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
@@ -67,7 +68,12 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
         </button>
       )}
 
-      <main className={styles.main}>{children}</main>
+      <main className={styles.main}>
+        <div className={styles.topBar}>
+          <NotificationBell />
+        </div>
+        {children}
+      </main>
     </div>
   );
 }

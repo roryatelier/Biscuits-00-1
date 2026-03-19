@@ -1,7 +1,7 @@
 'use server';
 
-import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { getAuthContext } from '@/lib/actions/context';
 
 export async function listPackaging(filters?: {
   format?: string;
@@ -9,8 +9,8 @@ export async function listPackaging(filters?: {
   status?: string;
   search?: string;
 }) {
-  const session = await auth();
-  if (!session?.user?.id) return [];
+  const ctx = await getAuthContext();
+  if (!ctx) return [];
 
   const where: Record<string, unknown> = {};
   if (filters?.format) where.format = filters.format;
@@ -27,8 +27,8 @@ export async function listPackaging(filters?: {
 }
 
 export async function getPackaging(id: string) {
-  const session = await auth();
-  if (!session?.user?.id) return null;
+  const ctx = await getAuthContext();
+  if (!ctx) return null;
 
   return prisma.packagingOption.findFirst({
     where: { id },

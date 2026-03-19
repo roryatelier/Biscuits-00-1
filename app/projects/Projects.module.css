@@ -124,6 +124,49 @@
   gap: 4px;
 }
 
+/* ── Card footer ── */
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardAvatars {
+  display: flex;
+  align-items: center;
+}
+
+.cardAvatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--brand-400);
+  color: var(--white-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  border: 2px solid var(--white-500);
+  margin-left: -6px;
+}
+.cardAvatar:first-child { margin-left: 0; }
+
+.cardAvatarMore {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--slate-200);
+  color: var(--slate-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 600;
+  border: 2px solid var(--white-500);
+  margin-left: -6px;
+}
+
 /* ── Empty state ── */
 .empty {
   text-align: center;

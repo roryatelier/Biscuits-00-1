@@ -127,11 +127,13 @@ export async function registerAction(formData: FormData) {
     });
   }
 
+  const redirectTo = inviteToken ? '/onboarding/invited' : '/onboarding';
+
   try {
     await signIn('credentials', {
       email,
       password,
-      redirectTo: '/onboarding',
+      redirectTo,
     });
   } catch (error) {
     if (error instanceof AuthError) {

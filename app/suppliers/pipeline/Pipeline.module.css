@@ -1,0 +1,422 @@
+.page {
+  padding: 24px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.pageSubtitle {
+  font-size: 13px;
+  color: #888;
+}
+
+/* Toolbar: toggle + brief selector */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.toggleBar {
+  display: flex;
+  background: #f0f0f0;
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.toggleBtn {
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.toggleBtn:hover {
+  color: #333;
+}
+
+.toggleBtnActive {
+  background: #fff;
+  color: #111;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.briefSelect {
+  padding: 6px 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #333;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+  min-width: 240px;
+}
+
+.briefSelect:focus {
+  border-color: #111;
+}
+
+/* Empty brief state */
+.emptyBriefState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.emptyBriefText {
+  font-size: 14px;
+  color: #999;
+}
+
+/* Match score badge */
+.matchBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+
+.matchGreen {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.matchAmber {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.matchRed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Board */
+.board {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  min-width: max-content;
+  padding-bottom: 24px;
+}
+
+.column {
+  width: 240px;
+  flex-shrink: 0;
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.columnHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #fff;
+}
+
+.columnDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.columnTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.columnCount {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  background: #f0f0f0;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.columnCards {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+/* Card */
+.card {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.cardBody {
+  padding: 12px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.cardBody:hover {
+  background: #fafafa;
+}
+
+.cardNameRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.cardName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cautionIcon {
+  color: #f59e0b;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.capabilityBadge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-bottom: 6px;
+}
+
+.cardChips {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.cardChip {
+  display: inline-block;
+  background: #f0f0f0;
+  color: #555;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.cardChipMore {
+  display: inline-block;
+  color: #888;
+  font-size: 10px;
+  padding: 2px 4px;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.certBadge {
+  font-size: 11px;
+  color: #888;
+}
+
+.permissionBadge {
+  display: inline-block;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+/* Transition dropdown */
+.cardTransition {
+  border-top: 1px solid #f0f0f0;
+  padding: 6px 8px;
+}
+
+.transitionSelect {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #555;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+}
+
+.transitionSelect:focus {
+  border-color: #111;
+}
+
+.transitionSelect:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Empty state */
+.emptyColumn {
+  padding: 20px 0;
+  text-align: center;
+}
+
+.emptyText {
+  font-size: 12px;
+  color: #bbb;
+}
+
+/* Dropout Reason Modal */
+.modalBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  width: 420px;
+  max-width: 90vw;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 4px;
+}
+
+.modalSubtitle {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 20px;
+}
+
+.modalLabel {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 6px;
+  margin-top: 12px;
+}
+
+.modalSelect {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #fff;
+}
+
+.modalSelect:focus {
+  outline: none;
+  border-color: #111;
+}
+
+.modalTextarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  font-size: 13px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.modalTextarea:focus {
+  outline: none;
+  border-color: #111;
+}
+
+.modalActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.modalCancelBtn {
+  padding: 8px 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modalCancelBtn:hover {
+  border-color: #111;
+}
+
+.modalConfirmBtn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modalConfirmBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

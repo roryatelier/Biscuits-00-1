@@ -46,6 +46,7 @@
   display: flex;
   overflow: hidden;
   transition: margin-left 0.25s ease;
+  position: relative;
 }
 
 /* Left (chat) panel */
@@ -70,11 +71,44 @@
   transition: width 0.25s ease;
 }
 
+.rightPanelCollapsed {
+  width: 0 !important;
+  overflow: hidden;
+}
+
+/* Floating button to re-open collapsed RHP */
+.rhpExpandBtn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white-500);
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: background 0.15s;
+  z-index: 10;
+}
+
+.rhpExpandBtn:hover {
+  background: var(--slate-100);
+}
+
+.rhpExpandBtn svg {
+  width: 18px;
+  height: 18px;
+}
+
 @media (max-width: 768px) {
   .wrapper { flex-direction: column; }
   .mainContent { flex-direction: column; }
   .leftPanel { width: 100% !important; }
   .rightPanel { width: 100% !important; }
   .divider { width: 100%; height: 1px; }
-  .page { padding: 24px 16px; }
+  .rhpExpandBtn { display: none; }
 }

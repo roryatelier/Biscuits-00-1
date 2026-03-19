@@ -233,6 +233,67 @@ upsert('SampleReview', {
   createdAt: now,
 });
 
+// ─── Project Assignments ────────────────────────────────────
+const assignments = [
+  { id: 'pa_01', projectId: 'proj_01', userId: userId, role: 'lead' },
+  { id: 'pa_02', projectId: 'proj_01', userId: saraId, role: 'member' },
+  { id: 'pa_03', projectId: 'proj_02', userId: saraId, role: 'lead' },
+  { id: 'pa_04', projectId: 'proj_03', userId: userId, role: 'lead' },
+];
+
+for (const a of assignments) {
+  upsert('ProjectAssignment', { ...a, createdAt: now });
+}
+
+// ─── Activities ─────────────────────────────────────────────
+function daysAgo(n) { return new Date(Date.now() - n * 86400000).toISOString(); }
+function hoursAgo(n) { return new Date(Date.now() - n * 3600000).toISOString(); }
+
+const activities = [
+  { id: 'act_01', projectId: 'proj_01', userId: userId, type: 'project_created', description: 'created this project', metadata: null, createdAt: daysAgo(14) },
+  { id: 'act_02', projectId: 'proj_01', userId: saraId, type: 'formulation_linked', description: 'linked formulation "Scalp Purify Treatment"', metadata: JSON.stringify({ formulationId: 'form_07' }), createdAt: daysAgo(12) },
+  { id: 'act_03', projectId: 'proj_01', userId: userId, type: 'formulation_linked', description: 'linked formulation "Keratin Shield"', metadata: JSON.stringify({ formulationId: 'form_02' }), createdAt: daysAgo(10) },
+  { id: 'act_04', projectId: 'proj_01', userId: userId, type: 'status_change', description: 'changed status to "In Development"', metadata: JSON.stringify({ from: 'Brief', to: 'In Development' }), createdAt: daysAgo(8) },
+  { id: 'act_05', projectId: 'proj_01', userId: saraId, type: 'sample_ordered', description: 'ordered sample SMP-0012 for "Scalp Purify Treatment"', metadata: JSON.stringify({ sampleOrderId: 'so_01', reference: 'SMP-0012' }), createdAt: daysAgo(5) },
+  { id: 'act_06', projectId: 'proj_01', userId: saraId, type: 'comment', description: 'left a comment: "The scent profile needs work — too medicinal for the target demographic."', metadata: JSON.stringify({ commentId: 'cmt_01' }), createdAt: daysAgo(3) },
+  { id: 'act_07', projectId: 'proj_01', userId: userId, type: 'comment', description: 'left a comment: "The zinc pyrithione concentration at 1% is right at the regulatory limit..."', metadata: JSON.stringify({ commentId: 'cmt_02' }), createdAt: hoursAgo(2) },
+  { id: 'act_08', projectId: 'proj_02', userId: saraId, type: 'project_created', description: 'created this project', metadata: null, createdAt: daysAgo(7) },
+  { id: 'act_09', projectId: 'proj_03', userId: userId, type: 'project_created', description: 'created this project', metadata: null, createdAt: daysAgo(10) },
+  { id: 'act_10', projectId: 'proj_03', userId: userId, type: 'status_change', description: 'changed status to "Sampling"', metadata: JSON.stringify({ from: 'In Development', to: 'Sampling' }), createdAt: daysAgo(4) },
+  { id: 'act_11', projectId: 'proj_01', userId: saraId, type: 'review_submitted', description: 'submitted a review for SMP-0012', metadata: JSON.stringify({ sampleOrderId: 'so_01' }), createdAt: daysAgo(1) },
+];
+
+for (const a of activities) {
+  upsert('Activity', a);
+}
+
+// ─── Comments ───────────────────────────────────────────────
+const comments = [
+  { id: 'cmt_01', body: 'The scent profile needs work — too medicinal for the target demographic. Can we explore a more herbal/botanical direction?', userId: saraId, entityType: 'project', entityId: 'proj_01', parentId: null, deletedAt: null, createdAt: daysAgo(3), updatedAt: daysAgo(3) },
+  { id: 'cmt_02', body: 'The zinc pyrithione concentration at 1% is right at the regulatory limit for leave-on. Since this is a rinse-off, we\'re fine — but flag it for the reg team.', userId: userId, entityType: 'project', entityId: 'proj_01', parentId: null, deletedAt: null, createdAt: hoursAgo(2), updatedAt: hoursAgo(2) },
+  { id: 'cmt_03', body: 'Good catch. I\'ve added a note to the brief. Should we also look at piroctone olamine as a backup active?', userId: saraId, entityType: 'project', entityId: 'proj_01', parentId: 'cmt_02', deletedAt: null, createdAt: hoursAgo(1), updatedAt: hoursAgo(1) },
+];
+
+for (const c of comments) {
+  upsert('Comment', c);
+}
+
+// ─── Documents ──────────────────────────────────────────────
+const documents = [
+  // Brand-level docs (no projectId)
+  { id: 'doc_brand_01', name: 'Brand Guidelines v2.1', fileName: 'brand-guidelines.pdf', fileUrl: '/uploads/brand-guidelines.pdf', fileSize: 2457600, mimeType: 'application/pdf', projectId: null, teamId, uploadedById: userId, createdAt: daysAgo(30) },
+  { id: 'doc_brand_02', name: 'Competitor Analysis Q1 2026', fileName: 'competitor-analysis.pdf', fileUrl: '/uploads/competitor-analysis.pdf', fileSize: 1843200, mimeType: 'application/pdf', projectId: null, teamId, uploadedById: saraId, createdAt: daysAgo(14) },
+  // Project docs
+  { id: 'doc_proj_01', name: 'Product Brief — Anti-Dandruff Shampoo', fileName: 'product-brief-anti-dandruff.pdf', fileUrl: '/uploads/product-brief-anti-dandruff.pdf', fileSize: 524288, mimeType: 'application/pdf', projectId: 'proj_01', teamId, uploadedById: userId, createdAt: daysAgo(12) },
+  { id: 'doc_proj_02', name: 'Regulatory Notes (AICIS)', fileName: 'regulatory-notes-aicis.pdf', fileUrl: '/uploads/regulatory-notes-aicis.pdf', fileSize: 307200, mimeType: 'application/pdf', projectId: 'proj_01', teamId, uploadedById: saraId, createdAt: daysAgo(10) },
+  { id: 'doc_proj_03', name: 'Stability Test Protocol', fileName: 'stability-test-protocol.docx', fileUrl: '/uploads/stability-test-protocol.docx', fileSize: 184320, mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', projectId: 'proj_01', teamId, uploadedById: userId, createdAt: daysAgo(5) },
+  { id: 'doc_proj_04', name: 'Ingredient Cost Sheet', fileName: 'ingredient-costs.xlsx', fileUrl: '/uploads/ingredient-costs.xlsx', fileSize: 92160, mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', projectId: 'proj_02', teamId, uploadedById: saraId, createdAt: daysAgo(7) },
+];
+
+for (const d of documents) {
+  upsert('Document', d);
+}
+
 // ─── Done ──────────────────────────────────────────────────
 console.log('✓ Seeded successfully!');
 console.log('  Users:          2 (rory@atelier.com / sara@atelier.com)');

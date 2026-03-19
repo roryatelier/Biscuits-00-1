@@ -257,6 +257,53 @@ export function ClipboardIcon({ className }: IconProps) {
   );
 }
 
+export function DocumentsIcon({ className }: IconProps) {
+  return (
+    <svg width="100%" height="100%" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <path d="M11.667 1.667H5a1.667 1.667 0 00-1.667 1.666v13.334A1.667 1.667 0 005 18.333h10a1.667 1.667 0 001.667-1.666V6.667l-5-5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M11.667 1.667v5h5M13.333 10.833H6.667M13.333 14.167H6.667M8.333 7.5H6.667" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/* ── Sparkle Tool Icon (small, for tool panel header) ──── */
+export function SparkleToolIcon({ className }: IconProps) {
+  return (
+    <svg width="100%" height="100%" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <path d="M4 1l.894 2.106L7 4l-2.106.894L4 7l-.894-2.106L1 4l2.106-.894L4 1z" fill="currentColor" />
+      <path d="M10 6l1.5 3.5L15 11l-3.5 1.5L10 16l-1.5-3.5L5 11l3.5-1.5L10 6z" fill="currentColor" />
+    </svg>
+  );
+}
+
+/* ── Arrow Up-Right (tool card action) ────────────────── */
+export function ArrowUpRightIcon({ className }: IconProps) {
+  return (
+    <svg width="100%" height="100%" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <path d="M3.5 8.5L8.5 3.5M8.5 3.5H4.5M8.5 3.5V7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/* ── Close / X Icon ───────────────────────────────────── */
+export function CloseIcon({ className }: IconProps) {
+  return (
+    <svg width="100%" height="100%" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <path d="M9 3L3 9M3 3l6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/* ── Search Icon ──────────────────────────────────────── */
+export function SearchIcon({ className }: IconProps) {
+  return (
+    <svg width="100%" height="100%" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M10.5 10.5L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function SettingsIcon({ className }: IconProps) {
   return (
     <svg width="100%" height="100%" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>

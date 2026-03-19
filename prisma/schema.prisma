@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 // ─── Auth.js required models ───────────────────────────────
@@ -27,6 +27,13 @@ model User {
   createdSampleOrders SampleOrder[] @relation("createdSampleOrders")
   sampleReviews    SampleReview[] @relation("sampleReviews")
   uploads          Upload[]       @relation("uploads")
+  activities       Activity[]     @relation("userActivities")
+  comments         Comment[]      @relation("userComments")
+  projectAssignments ProjectAssignment[] @relation("userAssignments")
+  createdShareLinks  ShareLink[]  @relation("createdShareLinks")
+  notifications    Notification[] @relation("userNotifications")
+  uploadedDocuments Document[]    @relation("uploadedDocuments")
+  supplierBriefAssignments SupplierBriefAssignment[] @relation("assignedByUser")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -80,6 +87,12 @@ model Team {
   formulations Formulation[]
   packagingOptions PackagingOption[]
   sampleOrders SampleOrder[]
+  documents   Document[]
+  conversations Conversation[]
+  briefs       Brief[]
+  cobaltSuppliers  CobaltSupplier[]
+  aosSuppliers     AosSupplier[]
+  supplierBriefs   SupplierBrief[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -133,6 +146,12 @@ model Project {
 
   formulations ProjectFormulation[]
   sampleOrders SampleOrder[]
+  activities   Activity[]
+  assignments  ProjectAssignment[]
+  shareLinks   ShareLink[]
+  documents    Document[]
+  conversation Conversation?
+  brief        Brief?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -272,4 +291,399 @@ model Upload {
   packaging   PackagingOption? @relation(fields: [packagingId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
+}
+
+// ─── Chat & Brief models ──────────────────────────────────
+
+model Conversation {
+  id        String @id @default(cuid())
+  projectId String @unique
+  teamId    String
+
+  project  Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  team     Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([teamId, updatedAt])
+}
+
+model Message {
+  id             String  @id @default(cuid())
+  conversationId String
+  role           String  // "user" | "assistant"
+  content        String
+  toolId         String? // tool that was used (e.g. "competitor-benchmarking")
+  toolName       String? // display name of the tool
+  status         String  @default("done") // "sending" | "streaming" | "done" | "error"
+  feedback       String? // "up" | "down" | null
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  researchTask ResearchTask?
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+model ResearchTask {
+  id        String @id @default(cuid())
+  messageId String @unique
+  topic     String   // bold topic description shown in the card
+  status    String   @default("running") // "running" | "completed" | "failed"
+  thinking  String?  // AI reasoning (shown via "Show thinking" toggle)
+  report    String?  // full research report (shown via "Show full research report" toggle)
+  summary   String?  // markdown summary shown inline in chat
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+}
+
+model Brief {
+  id        String @id @default(cuid())
+  projectId String @unique
+  teamId    String
+
+  // Formulation
+  productName       String?
+  category          String?
+  subCategory       String?
+  productDescription String?
+  freeFrom          String?  // JSON array of excluded ingredients
+  format            String?
+  volume            String?
+  heroIngredients   String?  // JSON array
+  benefits          String?  // JSON array
+  texture           String?
+  textureReference  String?  // URL or file reference
+  colour            String?
+  colourReference   String?
+  fragrance         String?
+  fragranceReference String?
+  claims            String?  // JSON array
+  targetCost        Float?
+
+  // Packaging
+  vesselType        String?
+  closureType       String?
+  packagingVolume   String?
+  supplierCity      String?
+  supplierCountry   String?
+  supplierAlsoMakes String?  // JSON array
+  referenceProduct  String?  // URL
+  artworkUrl        String?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  team    Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([teamId])
+}
+
+// ─── Collaboration models ─────────────────────────────────
+
+model Activity {
+  id          String  @id @default(cuid())
+  entityType  String  @default("project")  // "project" | "supplier"
+  entityId    String
+  projectId   String?  // optional — kept for backwards compat with existing project activities
+  userId      String
+  type        String    // status_change, formulation_linked, formulation_unlinked,
+                        // sample_ordered, sample_status_changed, review_submitted,
+                        // comment, shared, project_created, project_updated,
+                        // stage_transition, cert_changed, agreement_changed,
+                        // supplier_linked, brief_assigned, manual_entry
+  description String    // human-readable summary
+  metadata    Json?     // before/after values, linked IDs, drop-out reasons
+
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User     @relation("userActivities", fields: [userId], references: [id])
+
+  notifications Notification[]
+
+  createdAt DateTime @default(now())
+
+  @@index([projectId, createdAt])
+  @@index([entityType, entityId, createdAt])
+}
+
+model Comment {
+  id         String    @id @default(cuid())
+  body       String
+  userId     String
+  entityType String    // "project" | "formulation" | "sample_review"
+  entityId   String
+  parentId   String?
+  deletedAt  DateTime?
+
+  user   User     @relation("userComments", fields: [userId], references: [id])
+  parent Comment? @relation("commentThread", fields: [parentId], references: [id])
+  replies Comment[] @relation("commentThread")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([entityType, entityId, createdAt])
+}
+
+model ProjectAssignment {
+  id        String @id @default(cuid())
+  projectId String
+  userId    String
+  role      String @default("member")  // "lead" | "member"
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation("userAssignments", fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, userId])
+}
+
+model ShareLink {
+  id                 String    @id @default(cuid())
+  token              String    @unique
+  projectId          String
+  createdById        String
+  expiresAt          DateTime
+  revokedAt          DateTime?
+  includeIngredients Boolean   @default(false)
+  includeReviews     Boolean   @default(false)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  creator User    @relation("createdShareLinks", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([token])
+}
+
+model Notification {
+  id         String  @id @default(cuid())
+  userId     String
+  activityId String
+  read       Boolean @default(false)
+
+  user     User     @relation("userNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, read, createdAt])
+}
+
+// ─── Documents ─────────────────────────────────────────────
+
+model Document {
+  id           String  @id @default(cuid())
+  name         String
+  fileName     String
+  fileUrl      String
+  fileSize     Int?
+  mimeType     String?
+  projectId    String?   // null = team-level (brand doc), set = project doc
+  teamId       String
+  uploadedById String
+
+  project    Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  team       Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  uploadedBy User      @relation("uploadedDocuments", fields: [uploadedById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+  @@index([teamId])
+}
+
+// ─── Supplier Intelligence ──────────────────────────────────
+//
+//  DUAL-SYSTEM ARCHITECTURE
+//  ┌─────────────────┐         ┌─────────────────┐
+//  │ CobaltSupplier  │◄──────▶│  AosSupplier    │
+//  │ (discovery)     │  LINK   │ (qualification) │
+//  │ Import Yeti /   │(perm.)  │ Certs, agreements│
+//  │ Daily Med data  │         │ Pipeline stages  │
+//  └─────────────────┘         └────────┬─────────┘
+//                                       │
+//                          ┌────────────┼────────────┐
+//                          │            │            │
+//                   Certification  Agreement  SupplierBrief
+//                                              Assignment
+
+model CobaltSupplier {
+  id                   String  @id @default(cuid())
+  companyName          String
+  country              String
+  cor                  String?   // country code (KR, IT, JP, US, etc.)
+  categories           Json      // string[] — product categories
+  dataSource           String?   // "Import Yeti" | "Daily Med" | "Manual"
+  matchedProducts      Json      @default("[]") // array of {name, brand, sku, subcategory, rrp, markets[], url}
+  matchedProductsCount Int       @default(0)
+  linked               Boolean   @default(false)
+  aosId                String?   @unique
+  teamId               String
+
+  aosSupplier AosSupplier? @relation(fields: [aosId], references: [id])
+  team        Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([teamId])
+  @@index([linked])
+}
+
+model AosSupplier {
+  id                    String  @id @default(cuid())
+  companyName           String
+  companyLegalName      String?
+  factoryName           String?
+  qualificationStage    String  @default("Identified")
+    // Identified, Outreached, Capability Confirmed,
+    // Conditionally Qualified, Fully Qualified, Paused, Blacklisted
+  categories            Json    @default("[]")  // string[]
+  subcategories         Json    @default("[]")  // string[]
+  capabilityType        String  @default("unknown") // turnkey, blend_fill, both, unknown
+  capabilities          Json    @default("{}") // structured capability data:
+    // { fillTypes: string[], fillVolumeMin: int, fillVolumeMax: int,
+    //   packagingMaterials: string[], whiteLabel: boolean,
+    //   formulationCapabilities: string, notes: string }
+  moq                   Int?
+  keyBrands             Json    @default("[]")  // string[]
+  // Location
+  companyCity           String?
+  companyCountry        String?
+  factoryCity           String?
+  factoryCountry        String?
+  // Lead times & pricing
+  customSampleLeadTimeDays   Int?
+  productionLeadTimeDays     Int?
+  samplePriceMin        Float?  // USD
+  samplePriceMax        Float?  // USD
+  // Flags
+  cautionFlag           Boolean @default(false)
+  cautionNote           String?
+  cobaltSupplierId      String? @unique
+  cobaltEnabled         Boolean @default(false)
+  teamId                String
+
+  cobaltSupplier        CobaltSupplier?
+  team                  Team              @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  certifications        Certification[]
+  agreements            Agreement[]
+  briefAssignments      SupplierBriefAssignment[]
+  contacts              SupplierContact[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([teamId])
+  @@index([qualificationStage])
+  @@index([capabilityType])
+}
+
+model Certification {
+  id                 String  @id @default(cuid())
+  aosSupplierId      String
+  certType           String    // ISO_9001, ISO_14001, ISO_45001, ISO_22716,
+                               // GMP, FDA, FDA_OTC, TGA, SMETA, BSCI, FSC,
+                               // organic, vegan, cruelty_free, other
+  certBody           String?
+  scope              String?
+  issueDate          DateTime?
+  expiryDate         DateTime?
+  documentRef        String?
+  verificationStatus String  @default("unverified") // unverified, verified, expired
+
+  aosSupplier AosSupplier @relation(fields: [aosSupplierId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([aosSupplierId])
+  @@index([certType])
+}
+
+model Agreement {
+  id              String  @id @default(cuid())
+  aosSupplierId   String
+  agreementType   String    // NDA, MSA, IP, Payment
+  status          String  @default("not_started") // not_started, sent, signed
+  sentAt          DateTime?
+  signedAt        DateTime?
+
+  aosSupplier AosSupplier @relation(fields: [aosSupplierId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([aosSupplierId])
+}
+
+model SupplierContact {
+  id              String  @id @default(cuid())
+  aosSupplierId   String
+  name            String
+  title           String?
+  email           String?
+  mobile          String?
+  weChat          String?
+  isPrimary       Boolean @default(false)
+
+  aosSupplier AosSupplier @relation(fields: [aosSupplierId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([aosSupplierId])
+}
+
+model SupplierBrief {
+  id               String  @id @default(cuid())
+  name             String
+  customerName     String?
+  category         String
+  subcategory      String?
+  blendFillType    String?
+  dueDate          DateTime?
+  filterCategories Json    @default("[]")  // string[] — which supplier categories match
+  requiredCerts    Json    @default("[]")  // string[] — e.g., ["GMP", "FDA"]
+  requirements     Json    @default("{}")  // {vegan?: boolean, organic?: boolean, ...}
+  teamId           String
+
+  team        Team                      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  assignments SupplierBriefAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([teamId])
+}
+
+model SupplierBriefAssignment {
+  id                String    @id @default(cuid())
+  aosSupplierId     String
+  supplierBriefId   String
+  matchScore        Float?
+  matchBreakdown    Json?     // {certType: boolean, ...}
+  matchScoreStaleAt DateTime? // set when recalc fails — signals stale data
+  status            String    @default("assigned") // assigned, vetted, rejected
+  assignedById      String
+  notes             Json      @default("[]") // array of {text, author, date, type}
+
+  aosSupplier   AosSupplier   @relation(fields: [aosSupplierId], references: [id], onDelete: Cascade)
+  supplierBrief SupplierBrief @relation(fields: [supplierBriefId], references: [id], onDelete: Cascade)
+  assignedBy    User          @relation("assignedByUser", fields: [assignedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([aosSupplierId, supplierBriefId])
+  @@index([supplierBriefId])
 }

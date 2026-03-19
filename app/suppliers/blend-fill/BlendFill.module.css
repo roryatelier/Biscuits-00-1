@@ -1,0 +1,346 @@
+.page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.layout {
+  display: flex;
+  gap: 20px;
+}
+
+.mainPanel {
+  flex: 1;
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.pageSubtitle {
+  font-size: 13px;
+  color: #888;
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.searchInput:focus {
+  border-color: #111;
+}
+
+.filterSelect {
+  padding: 8px 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Table */
+.tableWrapper {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.th {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #fafafa;
+}
+
+.row {
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.row:hover {
+  background: #fafafa;
+}
+
+.rowActive {
+  background: #f0f7ff;
+}
+
+.rowActive:hover {
+  background: #f0f7ff;
+}
+
+.td {
+  font-size: 14px;
+  color: #333;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+.supplierName {
+  font-weight: 600;
+  color: #111;
+}
+
+.countBadge {
+  display: inline-block;
+  background: #f0f0f0;
+  color: #333;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.brandsText {
+  font-size: 13px;
+  color: #555;
+}
+
+.chips {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  display: inline-block;
+  background: #f0f0f0;
+  color: #555;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.chipMore {
+  display: inline-block;
+  color: #888;
+  font-size: 11px;
+  padding: 2px 4px;
+}
+
+.certIcons {
+  display: flex;
+  gap: 3px;
+}
+
+.certDot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.certVerified {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.certMissing {
+  background: #f0f0f0;
+  color: #bbb;
+}
+
+.linkedBadge {
+  display: inline-block;
+  background: #dbeafe;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 4px;
+}
+
+.unlinkedBadge {
+  display: inline-block;
+  background: #f0f0f0;
+  color: #888;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 4px;
+}
+
+/* Side panel */
+.sidePanel {
+  width: 360px;
+  flex-shrink: 0;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 20px;
+  align-self: flex-start;
+  position: sticky;
+  top: 24px;
+}
+
+.sidePanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.sidePanelTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111;
+}
+
+.closePanelBtn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #888;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.closePanelBtn:hover {
+  color: #111;
+}
+
+.sidePanelSection {
+  margin-bottom: 16px;
+}
+
+.sidePanelSectionTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+.productList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.productCard {
+  padding: 10px 12px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+}
+
+.productName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 4px;
+}
+
+.productMeta {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.productLink {
+  font-size: 12px;
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.productLink:hover {
+  text-decoration: underline;
+}
+
+.emptyText {
+  font-size: 13px;
+  color: #888;
+  text-align: center;
+  padding: 12px 0;
+}
+
+.sidePanelActions {
+  padding-top: 12px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.actionBtn {
+  width: 100%;
+  padding: 10px 16px;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.actionBtn:hover {
+  background: #333;
+}
+
+.actionBtn:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+.actionBtnSecondary {
+  width: 100%;
+  padding: 10px 16px;
+  background: #fff;
+  color: #111;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.actionBtnSecondary:hover {
+  border-color: #111;
+}
