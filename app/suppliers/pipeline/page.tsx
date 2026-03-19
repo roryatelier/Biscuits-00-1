@@ -17,7 +17,8 @@ export default async function PipelinePage() {
   const permissionEntries = await Promise.all(
     suppliers.map(async (s) => {
       const level = await getPermissionLevel(s.id);
-      return [s.id, level] as const;
+      const resolved = (level && typeof level === 'string') ? level : 'none';
+      return [s.id, resolved] as const;
     })
   );
   const permissionLevels: Record<string, 'none' | 'can_brief' | 'can_sample' | 'can_po'> =

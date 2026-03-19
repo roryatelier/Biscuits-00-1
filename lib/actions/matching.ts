@@ -1,22 +1,34 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { withAuth } from '@/lib/actions/context';
 import { computeMatchScorePure } from '@/lib/match-scoring';
 
 export async function computeMatchScore(
   aosSupplierId: string,
   supplierBriefId: string,
 ): Promise<{ score: number | null; breakdown: Record<string, boolean> }> {
-  const [brief, certifications] = await Promise.all([
-    prisma.supplierBrief.findUnique({ where: { id: supplierBriefId } }),
-    prisma.certification.findMany({ where: { aosSupplierId } }),
-  ]);
+  const result = await withAuth(async (ctx) => {
+    // Verify supplier belongs to team
+    const supplier = await prisma.aosSupplier.findFirst({
+      where: { id: aosSupplierId, teamId: ctx.teamId },
+      select: { id: true },
+    });
+    if (!supplier) return { score: null, breakdown: {} };
 
-  if (!brief) return { score: null, breakdown: {} };
+    const [brief, certifications] = await Promise.all([
+      prisma.supplierBrief.findFirst({ where: { id: supplierBriefId, teamId: ctx.teamId } }),
+      prisma.certification.findMany({ where: { aosSupplierId } }),
+    ]);
 
-  const requiredCerts = (brief.requiredCerts as string[]) || [];
+    if (!brief) return { score: null, breakdown: {} };
 
-  return computeMatchScorePure(certifications, requiredCerts);
+    const requiredCerts = (brief.requiredCerts as string[]) || [];
+    return computeMatchScorePure(certifications, requiredCerts);
+  });
+
+  if (result && 'error' in result) return { score: null, breakdown: {} };
+  return result as { score: number | null; breakdown: Record<string, boolean> };
 }
 
 /**

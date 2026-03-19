@@ -13,11 +13,12 @@ export default async function SupplierProfilePage({ params }: { params: Promise<
 
   const supplier = supplierResult;
 
-  const [permissionLevel, activitiesResult] = await Promise.all([
+  const [permissionLevelResult, activitiesResult] = await Promise.all([
     getPermissionLevel(supplier.id),
     listSupplierActivities(supplier.id),
   ]);
 
+  const permissionLevel = (permissionLevelResult && typeof permissionLevelResult === 'string') ? permissionLevelResult : 'none';
   const activities = Array.isArray(activitiesResult) ? activitiesResult : [];
 
   const serialized = {

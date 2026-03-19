@@ -220,10 +220,19 @@ export async function updateAgreementStatus(agreementId: string, status: string)
 //                                AND GMP + ISO = verified
 
 export async function getPermissionLevel(aosSupplierId: string) {
-  const [agreements, certifications] = await Promise.all([
-    prisma.agreement.findMany({ where: { aosSupplierId } }),
-    prisma.certification.findMany({ where: { aosSupplierId } }),
-  ]);
+  return withAuth(async (ctx) => {
+    // Verify supplier belongs to this team before computing permissions
+    const supplier = await prisma.aosSupplier.findFirst({
+      where: { id: aosSupplierId, teamId: ctx.teamId },
+      select: { id: true },
+    });
+    if (!supplier) return 'none';
 
-  return computePermissionLevel(agreements, certifications);
+    const [agreements, certifications] = await Promise.all([
+      prisma.agreement.findMany({ where: { aosSupplierId } }),
+      prisma.certification.findMany({ where: { aosSupplierId } }),
+    ]);
+
+    return computePermissionLevel(agreements, certifications);
+  });
 }
