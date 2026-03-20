@@ -304,6 +304,18 @@ export function SearchIcon({ className }: IconProps) {
   );
 }
 
+/* ── Building / Suppliers Icon ──────────────────────────── */
+export function BuildingIcon({ className }: IconProps) {
+  return (
+    <svg width="100%" height="100%" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <path d="M3 18V4a1 1 0 011-1h6a1 1 0 011 1v14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M11 8h5a1 1 0 011 1v9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M1 18h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M5.5 6h1M5.5 9h1M5.5 12h1M8.5 6h1M8.5 9h1M8.5 12h1M13.5 11h1M13.5 14h1" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function SettingsIcon({ className }: IconProps) {
   return (
     <svg width="100%" height="100%" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>

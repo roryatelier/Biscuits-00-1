@@ -4,6 +4,16 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import EmptyState from '@/components/EmptyState/EmptyState';
 import { linkCobaltToAos } from '@/lib/actions/suppliers';
+import {
+  STAGE_COLORS,
+  PERMISSION_LABELS,
+  PERMISSION_COLORS,
+  CAPABILITY_LABELS,
+  CAPABILITY_COLORS,
+  CERT_TYPES,
+  type PermissionLevel,
+  type CapabilityType,
+} from '@/lib/constants/suppliers';
 import styles from './Database.module.css';
 
 const STAGES = [
@@ -15,35 +25,31 @@ const STAGES = [
   'Paused',
   'Blacklisted',
 ];
-
-const STAGE_COLORS: Record<string, string> = {
-  'Identified': '#94a3b8',
-  'Outreached': '#3b82f6',
-  'Capability Confirmed': '#8b5cf6',
-  'Conditionally Qualified': '#f59e0b',
-  'Fully Qualified': '#22c55e',
-  'Paused': '#94a3b8',
-  'Blacklisted': '#ef4444',
+const CERT_TOOLTIPS: Record<string, string> = {
+  GMP: 'GMP',
+  ISO: 'ISO 22716',
+  Organic: 'Vegan/Organic',
+  Halal: 'Halal',
+  Vegan: 'Vegan/Organic',
+  COSMOS: 'COSMOS',
 };
-
-type PermissionLevel = 'none' | 'can_brief' | 'can_sample' | 'can_po';
-
-const PERMISSION_LABELS: Record<PermissionLevel, string> = {
-  none: 'No Permissions',
-  can_brief: 'Can Brief',
-  can_sample: 'Can Sample',
-  can_po: 'Can PO',
-};
-
-const PERMISSION_COLORS: Record<PermissionLevel, string> = {
-  none: '#94a3b8',
-  can_brief: '#3b82f6',
-  can_sample: '#22c55e',
-  can_po: '#8b5cf6',
-};
-
-const CERT_TYPES = ['GMP', 'ISO', 'Organic', 'Halal', 'Vegan', 'COSMOS'];
 const AGREEMENT_TYPES = ['NDA', 'MSA', 'IP', 'Payment'];
+const AGREEMENT_TOOLTIPS: Record<string, string> = {
+  NDA: 'NDA',
+  MSA: 'MSA',
+  IP: 'IP Agreement',
+  Payment: 'Payment Terms',
+};
+
+const STAGE_SORT_ORDER: Record<string, number> = {
+  'Fully Qualified': 0,
+  'Conditionally Qualified': 1,
+  'Capability Confirmed': 2,
+  'Outreached': 3,
+  'Identified': 4,
+  'Paused': 5,
+  'Blacklisted': 6,
+};
 
 type CertInfo = { id?: string; certType: string; verificationStatus: string; expiryDate?: string | null };
 type AgreementInfo = { id?: string; agreementType: string; status: string };
@@ -54,22 +60,6 @@ type MatchedProduct = {
   rrp?: string;
   markets?: string[];
   url?: string;
-};
-
-type CapabilityType = 'turnkey' | 'blend_fill' | 'both' | 'unknown';
-
-const CAPABILITY_LABELS: Record<CapabilityType, string> = {
-  turnkey: 'Turnkey',
-  blend_fill: 'B&F Only',
-  both: 'Both',
-  unknown: 'Unknown',
-};
-
-const CAPABILITY_COLORS: Record<CapabilityType, string> = {
-  turnkey: '#22c55e',
-  blend_fill: '#3b82f6',
-  both: '#8b5cf6',
-  unknown: '#94a3b8',
 };
 
 type AosSupplier = {
@@ -231,6 +221,11 @@ export default function DatabaseClient({
     if (viewMode === 'aos' && s.source === 'cobalt') return false;
     if (viewMode === 'discovery' && s.source === 'aos') return false;
     return true;
+  }).sort((a, b) => {
+    const aOrder = a.qualificationStage ? (STAGE_SORT_ORDER[a.qualificationStage] ?? 99) : 99;
+    const bOrder = b.qualificationStage ? (STAGE_SORT_ORDER[b.qualificationStage] ?? 99) : 99;
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    return a.companyName.localeCompare(b.companyName);
   });
 
   const selected = selectedKey ? unified.find(s => s.key === selectedKey) : null;
@@ -260,6 +255,11 @@ export default function DatabaseClient({
       <div className={styles.page}>
         <div className={styles.header}>
           <div>
+            <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>
+              <a href="/suppliers" style={{ color: '#94a3b8', textDecoration: 'none' }} onMouseOver={e => (e.currentTarget.style.color = '#64748b')} onMouseOut={e => (e.currentTarget.style.color = '#94a3b8')}>Supplier Intelligence</a>
+              <span style={{ margin: '0 6px' }}>/</span>
+              <span style={{ color: '#64748b' }}>Database</span>
+            </div>
             <h1 className={styles.pageTitle}>Supplier Database</h1>
             <p className={styles.pageSubtitle}>0 suppliers</p>
           </div>
@@ -277,6 +277,11 @@ export default function DatabaseClient({
     <div className={styles.page}>
       <div className={styles.header}>
         <div>
+          <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>
+            <a href="/suppliers" style={{ color: '#94a3b8', textDecoration: 'none' }} onMouseOver={e => (e.currentTarget.style.color = '#64748b')} onMouseOut={e => (e.currentTarget.style.color = '#94a3b8')}>Supplier Intelligence</a>
+            <span style={{ margin: '0 6px' }}>/</span>
+            <span style={{ color: '#64748b' }}>Database</span>
+          </div>
           <h1 className={styles.pageTitle}>Supplier Database</h1>
           <p className={styles.pageSubtitle}>
             {unified.length} suppliers &middot; {totalAos} AoS &middot; {totalCobalt} Discovery
@@ -463,7 +468,7 @@ export default function DatabaseClient({
                             <span
                               key={ct}
                               className={`${styles.certDot} ${certSet.has(ct) ? styles.certVerified : styles.certMissing}`}
-                              title={ct}
+                              title={CERT_TOOLTIPS[ct] || ct}
                             >
                               {ct.charAt(0)}
                             </span>
@@ -476,7 +481,7 @@ export default function DatabaseClient({
                             <span
                               key={at}
                               className={`${styles.certDot} ${agreementSet.has(at) ? styles.agreementSigned : styles.certMissing}`}
-                              title={at}
+                              title={AGREEMENT_TOOLTIPS[at] || at}
                             >
                               {at.charAt(0)}
                             </span>

@@ -10,6 +10,7 @@ import {
   HomeIcon,
   SparkleIcon,
   LocationPinIcon,
+  BuildingIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   FormulationIcon,
@@ -30,9 +31,15 @@ export default function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProp
   const { data: session } = useSession();
   const userName = session?.user?.name || 'User';
   const userInitial = userName.charAt(0).toUpperCase();
-  const [catalogOpen, setCatalogOpen] = useState(false);
-  const [sampleTrackingOpen, setSampleTrackingOpen] = useState(false);
-  const [supplierIntelOpen, setSupplierIntelOpen] = useState(false);
+  const [catalogOpen, setCatalogOpen] = useState(
+    pathname.startsWith('/formulations') || pathname.startsWith('/packaging')
+  );
+  const [sampleTrackingOpen, setSampleTrackingOpen] = useState(
+    pathname.startsWith('/samples')
+  );
+  const [supplierIntelOpen, setSupplierIntelOpen] = useState(
+    pathname.startsWith('/suppliers')
+  );
 
   const nav = (path: string) => { router.push(path); onNavigate?.(); };
 
@@ -192,7 +199,7 @@ export default function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProp
               onKeyDown={e => e.key === 'Enter' && setSupplierIntelOpen(!supplierIntelOpen)}
             >
               <div className={styles.dropdownHeaderLeft}>
-                <LocationPinIcon />
+                <BuildingIcon />
                 <p className={styles.navLabel}>Suppliers</p>
               </div>
               {supplierIntelOpen

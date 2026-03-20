@@ -86,6 +86,11 @@ export default function ImportClient() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
+        <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>
+          <a href="/suppliers" style={{ color: '#94a3b8', textDecoration: 'none' }} onMouseOver={e => (e.currentTarget.style.color = '#64748b')} onMouseOut={e => (e.currentTarget.style.color = '#94a3b8')}>Supplier Intelligence</a>
+          <span style={{ margin: '0 6px' }}>/</span>
+          <span style={{ color: '#64748b' }}>Import</span>
+        </div>
         <h1 className={styles.pageTitle}>Import Suppliers</h1>
         <p className={styles.pageSubtitle}>Upload a CSV file to bulk import suppliers into the database</p>
       </div>

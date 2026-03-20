@@ -3,6 +3,15 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { transitionSupplierStage } from '@/lib/actions/suppliers';
+import {
+  STAGE_COLORS,
+  PERMISSION_LABELS,
+  PERMISSION_COLORS,
+  CAPABILITY_LABELS,
+  CAPABILITY_BADGE_STYLES,
+  type PermissionLevel,
+  type CapabilityType,
+} from '@/lib/constants/suppliers';
 import styles from './Pipeline.module.css';
 
 const STAGES = [
@@ -15,32 +24,6 @@ const STAGES = [
   'Blacklisted',
 ] as const;
 
-const STAGE_COLORS: Record<string, string> = {
-  'Identified': '#94a3b8',
-  'Outreached': '#3b82f6',
-  'Capability Confirmed': '#8b5cf6',
-  'Conditionally Qualified': '#f59e0b',
-  'Fully Qualified': '#22c55e',
-  'Paused': '#94a3b8',
-  'Blacklisted': '#ef4444',
-};
-
-type PermissionLevel = 'none' | 'can_brief' | 'can_sample' | 'can_po';
-
-const PERMISSION_LABELS: Record<PermissionLevel, string> = {
-  none: 'No Permissions',
-  can_brief: 'Can Brief',
-  can_sample: 'Can Sample',
-  can_po: 'Can PO',
-};
-
-const PERMISSION_COLORS: Record<PermissionLevel, string> = {
-  none: '#94a3b8',
-  can_brief: '#3b82f6',
-  can_sample: '#22c55e',
-  can_po: '#8b5cf6',
-};
-
 const TRANSITION_MAP: Record<string, string[]> = {
   'Identified': ['Outreached', 'Paused', 'Blacklisted'],
   'Outreached': ['Capability Confirmed', 'Paused', 'Blacklisted'],
@@ -49,22 +32,6 @@ const TRANSITION_MAP: Record<string, string[]> = {
   'Fully Qualified': ['Conditionally Qualified', 'Paused', 'Blacklisted'],
   'Paused': ['Identified', 'Outreached'],
   'Blacklisted': [],
-};
-
-type CapabilityType = 'turnkey' | 'blend_fill' | 'both' | 'unknown';
-
-const CAPABILITY_LABELS: Record<CapabilityType, string> = {
-  turnkey: 'Turnkey',
-  blend_fill: 'B&F Only',
-  both: 'Both',
-  unknown: 'Unknown',
-};
-
-const CAPABILITY_BADGE_STYLES: Record<CapabilityType, { bg: string; color: string }> = {
-  turnkey: { bg: '#dcfce7', color: '#166534' },
-  blend_fill: { bg: '#dbeafe', color: '#1e40af' },
-  both: { bg: '#f3e8ff', color: '#6b21a8' },
-  unknown: { bg: '#f1f5f9', color: '#64748b' },
 };
 
 type PipelineSupplier = {
@@ -117,6 +84,7 @@ export default function PipelineClient({
   const [transitioningId, setTransitioningId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('network');
   const [selectedBriefId, setSelectedBriefId] = useState<string>('');
+  const [search, setSearch] = useState('');
   // Dropout reason modal
   const [reasonModal, setReasonModal] = useState<{ supplierId: string; toStage: string } | null>(null);
   const [reasonType, setReasonType] = useState('');
@@ -133,12 +101,18 @@ export default function PipelineClient({
   }
 
   // Determine which suppliers to display
-  const displaySuppliers: PipelineSupplier[] =
+  const baseSuppliers: PipelineSupplier[] =
     viewMode === 'network'
       ? suppliers
       : selectedBrief
         ? selectedBrief.assignments.map(a => a.supplier)
         : [];
+
+  const displaySuppliers = search.trim()
+    ? baseSuppliers.filter(s =>
+        s.companyName.toLowerCase().includes(search.trim().toLowerCase())
+      )
+    : baseSuppliers;
 
   const grouped: Record<string, PipelineSupplier[]> = {};
   for (const stage of STAGES) {
@@ -191,6 +165,11 @@ export default function PipelineClient({
     <div className={styles.page}>
       <div className={styles.header}>
         <div>
+          <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>
+            <a href="/suppliers" style={{ color: '#94a3b8', textDecoration: 'none' }} onMouseOver={e => (e.currentTarget.style.color = '#64748b')} onMouseOut={e => (e.currentTarget.style.color = '#94a3b8')}>Supplier Intelligence</a>
+            <span style={{ margin: '0 6px' }}>/</span>
+            <span style={{ color: '#64748b' }}>Pipeline</span>
+          </div>
           <h1 className={styles.pageTitle}>Pipeline Board</h1>
           <p className={styles.pageSubtitle}>
             {viewMode === 'network'
@@ -233,6 +212,14 @@ export default function PipelineClient({
             ))}
           </select>
         )}
+
+        <input
+          type="text"
+          className={styles.searchInput}
+          placeholder="Search suppliers..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
       </div>
 
       {showEmptyBriefState ? (
@@ -257,16 +244,18 @@ export default function PipelineClient({
                 </div>
 
                 <div className={styles.columnCards}>
-                  {cards.map(s => (
-                    <div key={s.id} className={styles.card}>
+                  {cards.map(s => {
+                    const isPausedCaution = stage === 'Paused' && s.cautionFlag;
+                    return (
+                    <div key={s.id} className={`${styles.card} ${isPausedCaution ? styles.cardNotViable : ''}`}>
                       <div
                         className={styles.cardBody}
                         onClick={() => router.push(`/suppliers/${s.id}`)}
                       >
                         <div className={styles.cardNameRow}>
-                          <span className={styles.cardName}>{s.companyName}</span>
+                          <span className={`${styles.cardName} ${isPausedCaution ? styles.cardNameMuted : ''}`}>{s.companyName}</span>
                           {s.cautionFlag && (
-                            <span className={styles.cautionIcon} title="Caution flag">&#x26A0;</span>
+                            <span className={`${styles.cautionIcon} ${isPausedCaution ? styles.cautionIconProminent : ''}`} title="Caution flag">&#x26A0;</span>
                           )}
                           {viewMode === 'brief' && matchScoreMap.has(s.id) && (
                             <MatchScoreBadge score={matchScoreMap.get(s.id) ?? null} />
@@ -324,7 +313,7 @@ export default function PipelineClient({
                         </div>
                       )}
                     </div>
-                  ))}
+                  ); })}
 
                   {cards.length === 0 && (
                     <div className={styles.emptyColumn}>

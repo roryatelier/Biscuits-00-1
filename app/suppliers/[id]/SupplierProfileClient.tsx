@@ -5,9 +5,17 @@ import { useRouter } from 'next/navigation';
 import { transitionSupplierStage, setCautionFlag } from '@/lib/actions/suppliers';
 import { addCertification, updateCertification, removeCertification, updateAgreementStatus } from '@/lib/actions/certifications';
 import { addManualActivity } from '@/lib/actions/supplier-activities';
+import {
+  STAGE_COLORS,
+  PERMISSION_LABELS,
+  PERMISSION_COLORS,
+  CAPABILITY_LABELS,
+  CAPABILITY_COLORS,
+  CERT_TYPES,
+  type PermissionLevel,
+  type CapabilityType,
+} from '@/lib/constants/suppliers';
 import styles from './SupplierProfile.module.css';
-
-type PermissionLevel = 'none' | 'can_brief' | 'can_sample' | 'can_po';
 
 const TRANSITION_MAP: Record<string, string[]> = {
   'Identified': ['Outreached', 'Paused', 'Blacklisted'],
@@ -19,31 +27,6 @@ const TRANSITION_MAP: Record<string, string[]> = {
   'Blacklisted': [],
 };
 
-const STAGE_COLORS: Record<string, string> = {
-  'Identified': '#94a3b8',
-  'Outreached': '#3b82f6',
-  'Capability Confirmed': '#8b5cf6',
-  'Conditionally Qualified': '#f59e0b',
-  'Fully Qualified': '#22c55e',
-  'Paused': '#94a3b8',
-  'Blacklisted': '#ef4444',
-};
-
-const PERMISSION_LABELS: Record<PermissionLevel, string> = {
-  none: 'No permissions',
-  can_brief: 'Can receive briefs',
-  can_sample: 'Can be sampled',
-  can_po: 'Can be PO\'d',
-};
-
-const PERMISSION_COLORS: Record<PermissionLevel, string> = {
-  none: '#94a3b8',
-  can_brief: '#f59e0b',
-  can_sample: '#8b5cf6',
-  can_po: '#22c55e',
-};
-
-const CERT_TYPES = ['GMP', 'ISO', 'Organic', 'Halal', 'Vegan', 'COSMOS'];
 const AGREEMENT_STATUSES = ['draft', 'sent', 'signed', 'expired'];
 
 type Certification = {
@@ -74,22 +57,6 @@ type BriefAssignment = {
     customerName: string | null;
     category: string;
   };
-};
-
-type CapabilityType = 'turnkey' | 'blend_fill' | 'both' | 'unknown';
-
-const CAPABILITY_LABELS: Record<CapabilityType, string> = {
-  turnkey: 'Turnkey',
-  blend_fill: 'B&F Only',
-  both: 'Both',
-  unknown: 'Unknown',
-};
-
-const CAPABILITY_COLORS: Record<CapabilityType, string> = {
-  turnkey: '#22c55e',
-  blend_fill: '#3b82f6',
-  both: '#8b5cf6',
-  unknown: '#94a3b8',
 };
 
 type SupplierProfile = {
@@ -146,6 +113,9 @@ export default function SupplierProfileClient({ supplier, activities = [] }: { s
   const [activityEntryType, setActivityEntryType] = useState('note');
   const [activityDescription, setActivityDescription] = useState('');
   const [activityDate, setActivityDate] = useState(new Date().toISOString().split('T')[0]);
+  // Caution flag modal
+  const [cautionModal, setCautionModal] = useState(false);
+  const [cautionNote, setCautionNote] = useState('');
 
   const validTransitions = TRANSITION_MAP[supplier.qualificationStage] || [];
 
@@ -157,9 +127,24 @@ export default function SupplierProfileClient({ supplier, activities = [] }: { s
   };
 
   const handleToggleCaution = () => {
-    const note = supplier.cautionFlag ? undefined : prompt('Caution note (optional):') || undefined;
+    if (supplier.cautionFlag) {
+      // Removing caution — no note needed
+      startTransition(async () => {
+        await setCautionFlag(supplier.id, false);
+        router.refresh();
+      });
+    } else {
+      // Setting caution — open modal for note
+      setCautionNote('');
+      setCautionModal(true);
+    }
+  };
+
+  const handleCautionConfirm = () => {
     startTransition(async () => {
-      await setCautionFlag(supplier.id, !supplier.cautionFlag, note ?? undefined);
+      await setCautionFlag(supplier.id, true, cautionNote.trim() || undefined);
+      setCautionModal(false);
+      setCautionNote('');
       router.refresh();
     });
   };
@@ -223,7 +208,12 @@ export default function SupplierProfileClient({ supplier, activities = [] }: { s
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <button className={styles.backBtn} onClick={() => router.push('/suppliers/database')}>&larr; Back</button>
+          <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>
+            <a href="/suppliers" style={{ color: '#94a3b8', textDecoration: 'none' }} onMouseOver={e => (e.currentTarget.style.color = '#64748b')} onMouseOut={e => (e.currentTarget.style.color = '#94a3b8')}>Supplier Intelligence</a>
+            <span style={{ margin: '0 6px' }}>/</span>
+            <span style={{ color: '#64748b' }}>{supplier.companyName}</span>
+          </div>
+          <button className={styles.backBtn} onClick={() => router.back()}>&larr; Back</button>
           <h1 className={styles.pageTitle}>{supplier.companyName}</h1>
           <div className={styles.badges}>
             <span
@@ -649,6 +639,38 @@ export default function SupplierProfileClient({ supplier, activities = [] }: { s
           </div>
         )}
       </div>
+
+      {/* Caution Flag Modal */}
+      {cautionModal && (
+        <div className={styles.modalBackdrop} onClick={() => setCautionModal(false)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <h3 className={styles.modalTitle}>Set Caution Flag</h3>
+            <p className={styles.modalSubtitle}>
+              Add an optional note explaining why this supplier has been flagged.
+            </p>
+            <label className={styles.modalLabel}>Note (optional)</label>
+            <textarea
+              className={styles.modalTextarea}
+              placeholder="Reason for caution flag..."
+              value={cautionNote}
+              onChange={e => setCautionNote(e.target.value)}
+              rows={3}
+            />
+            <div className={styles.modalActions}>
+              <button className={styles.modalCancelBtn} onClick={() => setCautionModal(false)}>
+                Cancel
+              </button>
+              <button
+                className={styles.modalConfirmBtn}
+                onClick={handleCautionConfirm}
+                disabled={isPending}
+              >
+                {isPending ? 'Saving...' : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

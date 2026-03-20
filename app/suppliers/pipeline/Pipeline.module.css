@@ -78,6 +78,21 @@
   border-color: #111;
 }
 
+/* Search input */
+.searchInput {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.searchInput:focus {
+  border-color: #111;
+}
+
 /* Empty brief state */
 .emptyBriefState {
   display: flex;
@@ -183,13 +198,13 @@
   background: #fff;
   border: 1px solid #e5e5e5;
   border-radius: 6px;
-  overflow: hidden;
 }
 
 .cardBody {
   padding: 12px;
   cursor: pointer;
   transition: background 0.1s;
+  min-height: 48px;
 }
 
 .cardBody:hover {
@@ -419,4 +434,23 @@
 .modalConfirmBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Not Viable — Paused cards with caution flag */
+.cardNotViable {
+  background: #fef3c7;
+  border-color: #fde68a;
+}
+
+.cardNotViable .cardBody:hover {
+  background: #fef9c3;
+}
+
+.cardNameMuted {
+  opacity: 0.7;
+}
+
+.cautionIconProminent {
+  font-size: 16px;
+  filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.5));
 }

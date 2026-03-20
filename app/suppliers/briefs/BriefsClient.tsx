@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import EmptyState from '@/components/EmptyState/EmptyState';
-import { getSupplierBrief } from '@/lib/actions/supplier-briefs';
+import { getSupplierBrief, createSupplierBrief } from '@/lib/actions/supplier-briefs';
 import styles from './Briefs.module.css';
 
 type Brief = {
@@ -27,6 +27,7 @@ type AssignedSupplier = {
     companyName: string;
     qualificationStage: string;
     categories: string[];
+    factoryCountry: string | null;
     certifications: { certType: string; verificationStatus: string; expiryDate: string | null }[];
     agreements: { agreementType: string; status: string }[];
   };
@@ -41,11 +42,100 @@ type BriefDetail = {
   assignments: AssignedSupplier[];
 };
 
+const CATEGORY_OPTIONS = ['General', 'Skincare', 'Colour Cosmetics', 'Bodycare', 'Haircare'];
+
+function CreateBriefModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState('General');
+  const [customerName, setCustomerName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) {
+      setError('Name is required');
+      return;
+    }
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const result = await createSupplierBrief({
+        name: name.trim(),
+        category,
+        customerName: customerName.trim() || undefined,
+      });
+      if (result && 'error' in result) {
+        setError(result.error as string);
+        setIsSubmitting(false);
+      } else {
+        onCreated();
+      }
+    } catch {
+      setError('Failed to create brief');
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+        <h2 className={styles.modalTitle}>New Brief</h2>
+        <form onSubmit={handleSubmit}>
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Name *</label>
+            <input
+              type="text"
+              className={styles.formInput}
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="e.g. Q3 Skincare Launch"
+              autoFocus
+            />
+          </div>
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Category</label>
+            <select
+              className={styles.formSelect}
+              value={category}
+              onChange={e => setCategory(e.target.value)}
+            >
+              {CATEGORY_OPTIONS.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.formField}>
+            <label className={styles.formLabel}>Customer Name</label>
+            <input
+              type="text"
+              className={styles.formInput}
+              value={customerName}
+              onChange={e => setCustomerName(e.target.value)}
+              placeholder="Optional"
+            />
+          </div>
+          {error && <p className={styles.formError}>{error}</p>}
+          <div className={styles.modalActions}>
+            <button type="button" className={styles.btnSecondary} onClick={onClose} disabled={isSubmitting}>
+              Cancel
+            </button>
+            <button type="submit" className={styles.btnPrimary} disabled={isSubmitting}>
+              {isSubmitting ? 'Creating...' : 'Create Brief'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function BriefsClient({ briefs }: { briefs: Brief[] }) {
   const router = useRouter();
   const [selectedBriefId, setSelectedBriefId] = useState<string | null>(null);
   const [briefDetail, setBriefDetail] = useState<BriefDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
     if (!selectedBriefId) {
@@ -73,20 +163,40 @@ export default function BriefsClient({ briefs }: { briefs: Brief[] }) {
     });
   }, [selectedBriefId]);
 
+  const handleBriefCreated = () => {
+    setShowCreateModal(false);
+    router.refresh();
+  };
+
+  const breadcrumb = (
+    <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>
+      <a href="/suppliers" style={{ color: '#94a3b8', textDecoration: 'none' }} onMouseOver={e => (e.currentTarget.style.color = '#64748b')} onMouseOut={e => (e.currentTarget.style.color = '#94a3b8')}>Supplier Intelligence</a>
+      <span style={{ margin: '0 6px' }}>/</span>
+      <span style={{ color: '#64748b' }}>Briefs</span>
+    </div>
+  );
+
   if (briefs.length === 0) {
     return (
       <div className={styles.page}>
         <div className={styles.header}>
           <div>
+            {breadcrumb}
             <h1 className={styles.pageTitle}>Brief Shortlists</h1>
             <p className={styles.pageSubtitle}>0 briefs</p>
           </div>
+          <button className={styles.newBriefBtn} onClick={() => setShowCreateModal(true)}>
+            + New Brief
+          </button>
         </div>
         <EmptyState
           icon="projects"
           heading="No supplier briefs yet"
           description="Create a supplier brief to start building shortlists."
         />
+        {showCreateModal && (
+          <CreateBriefModal onClose={() => setShowCreateModal(false)} onCreated={handleBriefCreated} />
+        )}
       </div>
     );
   }
@@ -95,9 +205,13 @@ export default function BriefsClient({ briefs }: { briefs: Brief[] }) {
     <div className={styles.page}>
       <div className={styles.header}>
         <div>
+          {breadcrumb}
           <h1 className={styles.pageTitle}>Brief Shortlists</h1>
           <p className={styles.pageSubtitle}>{briefs.length} briefs</p>
         </div>
+        <button className={styles.newBriefBtn} onClick={() => setShowCreateModal(true)}>
+          + New Brief
+        </button>
       </div>
 
       <div className={styles.layout}>
@@ -173,27 +287,46 @@ export default function BriefsClient({ briefs }: { briefs: Brief[] }) {
                   <p className={styles.emptyText}>No suppliers assigned to this brief.</p>
                 ) : (
                   <div className={styles.supplierList}>
-                    {briefDetail.assignments.map(a => (
-                      <div
-                        key={a.id}
-                        className={styles.supplierCard}
-                        onClick={() => router.push(`/suppliers/${a.aosSupplier.id}`)}
-                      >
-                        <div className={styles.supplierInfo}>
-                          <p className={styles.supplierName}>{a.aosSupplier.companyName}</p>
-                          <p className={styles.supplierMeta}>{a.aosSupplier.qualificationStage}</p>
+                    {briefDetail.assignments.map(a => {
+                      const certCount = a.aosSupplier.certifications.length;
+                      const hasNDA = a.aosSupplier.agreements.some(ag => ag.agreementType === 'NDA' && ag.status === 'signed');
+                      const hasMSA = a.aosSupplier.agreements.some(ag => ag.agreementType === 'MSA' && ag.status === 'signed');
+
+                      return (
+                        <div
+                          key={a.id}
+                          className={styles.supplierCard}
+                          onClick={() => router.push(`/suppliers/${a.aosSupplier.id}`)}
+                        >
+                          <div className={styles.supplierInfo}>
+                            <p className={styles.supplierName}>{a.aosSupplier.companyName}</p>
+                            <div className={styles.supplierMetaRow}>
+                              <span className={styles.supplierMeta}>{a.aosSupplier.qualificationStage}</span>
+                              {a.aosSupplier.factoryCountry && (
+                                <span className={styles.supplierMeta}>{a.aosSupplier.factoryCountry}</span>
+                              )}
+                              {certCount > 0 && (
+                                <span className={styles.certCountBadge}>{certCount} cert{certCount !== 1 ? 's' : ''}</span>
+                              )}
+                              {(hasNDA || hasMSA) && (
+                                <span className={styles.permissionBadge}>
+                                  {[hasNDA && 'NDA', hasMSA && 'MSA'].filter(Boolean).join(' + ')}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className={styles.matchScoreCol}>
+                            {a.matchScore != null ? (
+                              <span className={`${styles.scoreBadge} ${a.matchScore >= 80 ? styles.scoreHigh : a.matchScore >= 50 ? styles.scoreMed : styles.scoreLow}`}>
+                                {a.matchScore}%
+                              </span>
+                            ) : (
+                              <span className={styles.scoreNA}>N/A</span>
+                            )}
+                          </div>
                         </div>
-                        <div className={styles.matchScoreCol}>
-                          {a.matchScore != null ? (
-                            <span className={`${styles.scoreBadge} ${a.matchScore >= 80 ? styles.scoreHigh : a.matchScore >= 50 ? styles.scoreMed : styles.scoreLow}`}>
-                              {a.matchScore}%
-                            </span>
-                          ) : (
-                            <span className={styles.scoreNA}>N/A</span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -201,6 +334,10 @@ export default function BriefsClient({ briefs }: { briefs: Brief[] }) {
           )}
         </div>
       </div>
+
+      {showCreateModal && (
+        <CreateBriefModal onClose={() => setShowCreateModal(false)} onCreated={handleBriefCreated} />
+      )}
     </div>
   );
 }
