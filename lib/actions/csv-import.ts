@@ -60,86 +60,90 @@ export async function previewCsvImport(csvText: string): Promise<ImportPreview |
 
 export async function commitCsvImport(suppliers: ParsedSupplier[]) {
   return withAuth(async (ctx) => {
-    let created = 0;
-    let certsCreated = 0;
-    let agreementsCreated = 0;
-    let contactsCreated = 0;
+    const result = await prisma.$transaction(async (tx) => {
+      let created = 0;
+      let certsCreated = 0;
+      let agreementsCreated = 0;
+      let contactsCreated = 0;
 
-    for (const s of suppliers) {
-      const aos = await prisma.aosSupplier.create({
+      for (const s of suppliers) {
+        const aos = await tx.aosSupplier.create({
+          data: {
+            companyName: s.companyName,
+            companyCountry: s.country,
+            companyCity: s.companyCity,
+            factoryCity: s.factoryCity,
+            factoryCountry: s.factoryCountry || s.country,
+            categories: s.categories as Prisma.InputJsonValue,
+            subcategories: s.subcategories as Prisma.InputJsonValue,
+            capabilityType: s.capabilityType,
+            moq: s.moq,
+            keyBrands: s.keyBrands as Prisma.InputJsonValue,
+            teamId: ctx.teamId,
+          },
+        });
+        created++;
+
+        // Create certifications
+        for (const certType of s.certTypes) {
+          await tx.certification.create({
+            data: {
+              aosSupplierId: aos.id,
+              certType: certType.trim(),
+              verificationStatus: 'unverified',
+            },
+          });
+          certsCreated++;
+        }
+
+        // Create agreements
+        for (const agreementType of s.agreementTypes) {
+          await tx.agreement.create({
+            data: {
+              aosSupplierId: aos.id,
+              agreementType: agreementType.trim(),
+              status: 'not_started',
+            },
+          });
+          agreementsCreated++;
+        }
+
+        // Create contact if provided
+        if (s.contactName) {
+          await tx.supplierContact.create({
+            data: {
+              aosSupplierId: aos.id,
+              name: s.contactName,
+              email: s.contactEmail,
+              mobile: s.contactMobile,
+              isPrimary: true,
+            },
+          });
+          contactsCreated++;
+        }
+      }
+
+      // Log activity
+      await tx.activity.create({
         data: {
-          companyName: s.companyName,
-          companyCountry: s.country,
-          companyCity: s.companyCity,
-          factoryCity: s.factoryCity,
-          factoryCountry: s.factoryCountry || s.country,
-          categories: s.categories as Prisma.InputJsonValue,
-          subcategories: s.subcategories as Prisma.InputJsonValue,
-          capabilityType: s.capabilityType,
-          moq: s.moq,
-          keyBrands: s.keyBrands as Prisma.InputJsonValue,
-          teamId: ctx.teamId,
+          entityType: 'supplier',
+          entityId: 'import',
+          userId: ctx.userId,
+          type: 'project_created',
+          description: `imported ${created} suppliers via CSV`,
+          metadata: { created, certsCreated, agreementsCreated, contactsCreated } as Prisma.InputJsonValue,
         },
       });
-      created++;
 
-      // Create certifications
-      for (const certType of s.certTypes) {
-        await prisma.certification.create({
-          data: {
-            aosSupplierId: aos.id,
-            certType: certType.trim(),
-            verificationStatus: 'unverified',
-          },
-        });
-        certsCreated++;
-      }
-
-      // Create agreements
-      for (const agreementType of s.agreementTypes) {
-        await prisma.agreement.create({
-          data: {
-            aosSupplierId: aos.id,
-            agreementType: agreementType.trim(),
-            status: 'not_started',
-          },
-        });
-        agreementsCreated++;
-      }
-
-      // Create contact if provided
-      if (s.contactName) {
-        await prisma.supplierContact.create({
-          data: {
-            aosSupplierId: aos.id,
-            name: s.contactName,
-            email: s.contactEmail,
-            mobile: s.contactMobile,
-            isPrimary: true,
-          },
-        });
-        contactsCreated++;
-      }
-    }
-
-    // Log activity
-    await prisma.activity.create({
-      data: {
-        entityType: 'supplier',
-        entityId: 'import',
-        userId: ctx.userId,
-        type: 'project_created',
-        description: `imported ${created} suppliers via CSV`,
-        metadata: { created, certsCreated, agreementsCreated, contactsCreated } as Prisma.InputJsonValue,
-      },
+      return {
+        success: true,
+        created,
+        certsCreated,
+        agreementsCreated,
+        contactsCreated,
+      };
     });
 
-    return {
-      success: true,
-      created,
-      certsCreated,
-      agreementsCreated,
-      contactsCreated,
-    };
+    return result;
   });
 }

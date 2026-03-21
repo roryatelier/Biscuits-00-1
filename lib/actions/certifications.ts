@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { withAuth } from '@/lib/actions/context';
 import { recalculateMatchScores } from '@/lib/actions/matching';
-import { computePermissionLevel } from '@/lib/suppliers/permission-logic';
+import { computePermissionLevel, type PermissionLevel, type AgreementInput, type CertificationInput } from '@/lib/suppliers/permission-logic';
 
 // ─── Certification CRUD ─────────────────────────────────────
 
@@ -33,6 +33,11 @@ export async function addCertification(aosSupplierId: string, data: {
   verificationStatus?: string;
 }) {
   return withAuth(async (ctx) => {
+    if (data.verificationStatus !== undefined &&
+        !(VALID_VERIFICATION_STATUSES as readonly string[]).includes(data.verificationStatus)) {
+      return { error: `Invalid verification status "${data.verificationStatus}". Must be one of: ${VALID_VERIFICATION_STATUSES.join(', ')}` };
+    }
+
     const supplier = await prisma.aosSupplier.findFirst({
       where: { id: aosSupplierId, teamId: ctx.teamId },
     });
@@ -64,7 +69,7 @@ export async function addCertification(aosSupplierId: string, data: {
     });
 
     // Recalculate match scores for all assigned briefs
-    await recalculateMatchScores(aosSupplierId);
+    await recalculateMatchScores(aosSupplierId, ctx.teamId);
 
     return { success: true, id: cert.id };
   });
@@ -79,6 +84,11 @@ export async function updateCertification(certId: string, data: {
   verificationStatus?: string;
 }) {
   return withAuth(async (ctx) => {
+    if (data.verificationStatus !== undefined &&
+        !(VALID_VERIFICATION_STATUSES as readonly string[]).includes(data.verificationStatus)) {
+      return { error: `Invalid verification status "${data.verificationStatus}". Must be one of: ${VALID_VERIFICATION_STATUSES.join(', ')}` };
+    }
+
     const cert = await prisma.certification.findFirst({
       where: { id: certId },
       include: { aosSupplier: { select: { id: true, teamId: true } } },
@@ -108,7 +118,7 @@ export async function updateCertification(certId: string, data: {
       },
     });
 
-    await recalculateMatchScores(cert.aosSupplierId);
+    await recalculateMatchScores(cert.aosSupplierId, ctx.teamId);
 
     return { success: true };
   });
@@ -135,7 +145,7 @@ export async function removeCertification(certId: string) {
       },
     });
 
-    await recalculateMatchScores(cert.aosSupplierId);
+    await recalculateMatchScores(cert.aosSupplierId, ctx.teamId);
 
     return { success: true };
   });
@@ -172,8 +182,15 @@ export async function listAgreements(aosSupplierId: string) {
   });
 }
 
+const VALID_AGREEMENT_STATUSES = ['not_started', 'sent', 'signed'] as const;
+const VALID_VERIFICATION_STATUSES = ['unverified', 'verified', 'expired'] as const;
+
 export async function updateAgreementStatus(agreementId: string, status: string) {
   return withAuth(async (ctx) => {
+    if (!(VALID_AGREEMENT_STATUSES as readonly string[]).includes(status)) {
+      return { error: `Invalid agreement status "${status}". Must be one of: ${VALID_AGREEMENT_STATUSES.join(', ')}` };
+    }
+
     const agreement = await prisma.agreement.findFirst({
       where: { id: agreementId },
       include: { aosSupplier: { select: { id: true, teamId: true } } },
@@ -234,5 +251,61 @@ export async function getPermissionLevel(aosSupplierId: string) {
     ]);
 
     return computePermissionLevel(agreements, certifications);
+  });
+}
+
+/**
+ * Batch permission level computation for multiple suppliers.
+ * Fetches ALL agreements and certifications for the team in just 2 queries,
+ * then computes permission levels in-memory.
+ * Use this on list pages instead of calling getPermissionLevel() per supplier.
+ */
+export async function getPermissionLevels(aosSupplierIds: string[]) {
+  return withAuth(async (ctx) => {
+    if (aosSupplierIds.length === 0) return {} as Record<string, PermissionLevel>;
+
+    // 2 queries total instead of 3N queries
+    const [allAgreements, allCertifications] = await Promise.all([
+      prisma.agreement.findMany({
+        where: {
+          aosSupplierId: { in: aosSupplierIds },
+          aosSupplier: { teamId: ctx.teamId },
+        },
+        select: { aosSupplierId: true, agreementType: true, status: true },
+      }),
+      prisma.certification.findMany({
+        where: {
+          aosSupplierId: { in: aosSupplierIds },
+          aosSupplier: { teamId: ctx.teamId },
+        },
+        select: { aosSupplierId: true, certType: true, verificationStatus: true },
+      }),
+    ]);
+
+    // Group by supplier ID
+    const agreementsBySupplierId = new Map<string, AgreementInput[]>();
+    for (const a of allAgreements) {
+      const list = agreementsBySupplierId.get(a.aosSupplierId);
+      if (list) list.push(a);
+      else agreementsBySupplierId.set(a.aosSupplierId, [a]);
+    }
+
+    const certsBySupplierId = new Map<string, CertificationInput[]>();
+    for (const c of allCertifications) {
+      const list = certsBySupplierId.get(c.aosSupplierId);
+      if (list) list.push(c);
+      else certsBySupplierId.set(c.aosSupplierId, [c]);
+    }
+
+    // Compute permission level for each supplier in-memory
+    const result: Record<string, PermissionLevel> = {};
+    for (const id of aosSupplierIds) {
+      result[id] = computePermissionLevel(
+        agreementsBySupplierId.get(id) || [],
+        certsBySupplierId.get(id) || [],
+      );
+    }
+
+    return result;
   });
 }

@@ -63,7 +63,7 @@ type ViewMode = 'network' | 'brief';
 
 function MatchScoreBadge({ score }: { score: number | null }) {
   if (score == null) return null;
-  const pct = Math.round(score * 100);
+  const pct = Math.round(score);
   let colorClass = styles.matchRed;
   if (pct >= 80) colorClass = styles.matchGreen;
   else if (pct >= 50) colorClass = styles.matchAmber;

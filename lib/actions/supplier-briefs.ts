@@ -132,7 +132,7 @@ export async function updateSupplierBrief(id: string, data: {
 
     // Recalculate match scores if requirements changed
     if (requirementsChanged) {
-      await recalculateMatchScoresForBrief(id);
+      await recalculateMatchScoresForBrief(id, ctx.teamId);
     }
 
     return { success: true };

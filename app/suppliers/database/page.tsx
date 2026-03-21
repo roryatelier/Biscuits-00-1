@@ -1,6 +1,6 @@
 import PlatformLayout from '@/components/PlatformLayout/PlatformLayout';
 import { listAosSuppliers, listCobaltSuppliers } from '@/lib/actions/suppliers';
-import { getPermissionLevel } from '@/lib/actions/certifications';
+import { getPermissionLevels } from '@/lib/actions/certifications';
 import DatabaseClient from './DatabaseClient';
 
 export default async function DatabasePage() {
@@ -12,16 +12,10 @@ export default async function DatabasePage() {
   const suppliers = Array.isArray(suppliersResult) ? suppliersResult : [];
   const cobaltRaw = Array.isArray(cobaltResult) ? cobaltResult : [];
 
-  // Batch permission lookups for all AoS suppliers
-  const permissionEntries = await Promise.all(
-    suppliers.map(async (s) => {
-      const level = await getPermissionLevel(s.id);
-      const resolved = (level && typeof level === 'string') ? level : 'none';
-      return [s.id, resolved] as const;
-    })
-  );
+  // Batch permission lookups — 2 queries instead of 3N
+  const permissionResult = await getPermissionLevels(suppliers.map(s => s.id));
   const permissionLevels: Record<string, 'none' | 'can_brief' | 'can_sample' | 'can_po'> =
-    Object.fromEntries(permissionEntries);
+    (permissionResult && !('error' in permissionResult)) ? permissionResult : {};
 
   const serializedAos = suppliers.map(s => ({
     id: s.id,

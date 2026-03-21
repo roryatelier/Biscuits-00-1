@@ -36,9 +36,12 @@ export async function computeMatchScore(
  * Called when supplier certifications change.
  * On failure: sets matchScoreStaleAt instead of silently leaving stale data.
  */
-export async function recalculateMatchScores(aosSupplierId: string): Promise<void> {
+export async function recalculateMatchScores(aosSupplierId: string, teamId: string): Promise<void> {
   const assignments = await prisma.supplierBriefAssignment.findMany({
-    where: { aosSupplierId },
+    where: {
+      aosSupplierId,
+      aosSupplier: { teamId },
+    },
     select: { id: true, supplierBriefId: true },
   });
 
@@ -67,9 +70,12 @@ export async function recalculateMatchScores(aosSupplierId: string): Promise<voi
  * Recalculate match scores for all suppliers assigned to a brief.
  * Called when brief requirements change.
  */
-export async function recalculateMatchScoresForBrief(supplierBriefId: string): Promise<void> {
+export async function recalculateMatchScoresForBrief(supplierBriefId: string, teamId: string): Promise<void> {
   const assignments = await prisma.supplierBriefAssignment.findMany({
-    where: { supplierBriefId },
+    where: {
+      supplierBriefId,
+      supplierBrief: { teamId },
+    },
     select: { id: true, aosSupplierId: true },
   });
 

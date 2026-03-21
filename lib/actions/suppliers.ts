@@ -303,20 +303,25 @@ export async function linkCobaltToAos(cobaltId: string, existingAosId?: string) 
       ]);
       aosId = existingAosId;
     } else {
-      // Create new AoS record from Cobalt data
-      const newAos = await prisma.aosSupplier.create({
-        data: {
-          companyName: cobalt.companyName,
-          categories: cobalt.categories as Prisma.InputJsonValue,
-          cobaltSupplierId: cobaltId,
-          cobaltEnabled: true,
-          teamId: ctx.teamId,
-        },
-      });
+      // Create new AoS record from Cobalt data — wrapped in transaction
+      // to prevent orphaned records if the Cobalt update fails
+      const newAos = await prisma.$transaction(async (tx) => {
+        const created = await tx.aosSupplier.create({
+          data: {
+            companyName: cobalt.companyName,
+            categories: cobalt.categories as Prisma.InputJsonValue,
+            cobaltSupplierId: cobaltId,
+            cobaltEnabled: true,
+            teamId: ctx.teamId,
+          },
+        });
 
-      await prisma.cobaltSupplier.update({
-        where: { id: cobaltId },
-        data: { linked: true, aosId: newAos.id },
+        await tx.cobaltSupplier.update({
+          where: { id: cobaltId },
+          data: { linked: true, aosId: created.id },
+        });
+
+        return created;
       });
       aosId = newAos.id;
     }
@@ -348,7 +353,7 @@ export async function enableInCobalt(aosId: string, categories: string[]) {
     const cobalt = await prisma.cobaltSupplier.create({
       data: {
         companyName: aos.companyName,
-        country: '',
+        country: aos.companyCountry || aos.factoryCountry || 'Unknown',
         categories: categories,
         dataSource: 'AoS',
         linked: true,
