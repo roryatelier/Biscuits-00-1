@@ -6,6 +6,11 @@ import { transitionSupplierStage, setCautionFlag } from '@/lib/actions/suppliers
 import { addCertification, updateCertification, removeCertification, updateAgreementStatus } from '@/lib/actions/certifications';
 import { addManualActivity } from '@/lib/actions/supplier-activities';
 import {
+  TRANSITION_MAP,
+  DROPOUT_REASONS,
+  requiresReason,
+} from '@/lib/supplier-constants';
+import {
   STAGE_COLORS,
   PERMISSION_LABELS,
   PERMISSION_COLORS,
@@ -17,17 +22,11 @@ import {
 } from '@/lib/constants/suppliers';
 import styles from './SupplierProfile.module.css';
 
-const TRANSITION_MAP: Record<string, string[]> = {
-  'Identified': ['Outreached', 'Paused', 'Blacklisted'],
-  'Outreached': ['Capability Confirmed', 'Paused', 'Blacklisted'],
-  'Capability Confirmed': ['Conditionally Qualified', 'Outreached', 'Paused', 'Blacklisted'],
-  'Conditionally Qualified': ['Fully Qualified', 'Capability Confirmed', 'Paused', 'Blacklisted'],
-  'Fully Qualified': ['Conditionally Qualified', 'Paused', 'Blacklisted'],
-  'Paused': ['Identified', 'Outreached'],
-  'Blacklisted': [],
-};
-
-const AGREEMENT_STATUSES = ['draft', 'sent', 'signed', 'expired'];
+const AGREEMENT_STATUSES: { value: string; label: string }[] = [
+  { value: 'not_started', label: 'Not Started' },
+  { value: 'sent', label: 'Sent' },
+  { value: 'signed', label: 'Signed' },
+];
 
 type Certification = {
   id: string;
@@ -139,13 +138,45 @@ export default function SupplierProfileClient({ supplier, activities = [] }: { s
   // Caution flag modal
   const [cautionModal, setCautionModal] = useState(false);
   const [cautionNote, setCautionNote] = useState('');
+  // Dropout reason modal (for Paused/Blacklisted transitions)
+  const [reasonModal, setReasonModal] = useState<{ toStage: string } | null>(null);
+  const [reasonType, setReasonType] = useState('');
+  const [reasonNote, setReasonNote] = useState('');
+  // Error display
+  const [transitionError, setTransitionError] = useState<string | null>(null);
 
   const validTransitions = TRANSITION_MAP[supplier.qualificationStage] || [];
 
   const handleTransition = (toStage: string) => {
+    setTransitionError(null);
+    if (requiresReason(toStage)) {
+      setReasonModal({ toStage });
+      setReasonType('');
+      setReasonNote('');
+      return;
+    }
+    executeTransition(toStage);
+  };
+
+  const executeTransition = (toStage: string, reason?: { type: string; note?: string }) => {
     startTransition(async () => {
-      await transitionSupplierStage(supplier.id, toStage);
+      const result = await transitionSupplierStage(supplier.id, toStage, reason);
+      if (result && typeof result === 'object' && 'error' in result) {
+        setTransitionError((result as { error: string }).error);
+      } else {
+        setTransitionError(null);
+        setReasonModal(null);
+      }
       router.refresh();
+    });
+  };
+
+  const handleReasonSubmit = () => {
+    if (!reasonModal || !reasonType) return;
+    if (reasonType === 'Other' && !reasonNote.trim()) return;
+    executeTransition(reasonModal.toStage, {
+      type: reasonType,
+      note: reasonNote.trim() || undefined,
     });
   };
 
@@ -513,8 +544,8 @@ export default function SupplierProfileClient({ supplier, activities = [] }: { s
                             disabled={isPending}
                           >
                             <option value="">Update...</option>
-                            {AGREEMENT_STATUSES.filter(s => s !== ag.status).map(s => (
-                              <option key={s} value={s}>{s}</option>
+                            {AGREEMENT_STATUSES.filter(s => s.value !== ag.status).map(s => (
+                              <option key={s.value} value={s.value}>{s.label}</option>
                             ))}
                           </select>
                         </td>
@@ -674,6 +705,63 @@ export default function SupplierProfileClient({ supplier, activities = [] }: { s
           </div>
         )}
       </div>
+
+      {/* Transition error banner */}
+      {transitionError && (
+        <div style={{ padding: '10px 16px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#dc2626', fontSize: '13px', margin: '0 0 12px' }}>
+          {transitionError}
+        </div>
+      )}
+
+      {/* Dropout Reason Modal */}
+      {reasonModal && (
+        <div className={styles.modalBackdrop} onClick={() => setReasonModal(null)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <h3 className={styles.modalTitle}>
+              {reasonModal.toStage === 'Blacklisted' ? 'Blacklist' : 'Pause'} Supplier
+            </h3>
+            <p className={styles.modalSubtitle}>
+              Please provide a reason for this action. This will be logged in the audit trail.
+            </p>
+            <label className={styles.modalLabel}>Reason</label>
+            <select
+              className={styles.modalSelect}
+              value={reasonType}
+              onChange={e => setReasonType(e.target.value)}
+            >
+              <option value="">Select a reason...</option>
+              {DROPOUT_REASONS.map(r => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+            <label className={styles.modalLabel}>
+              Notes {reasonType === 'Other' ? '(required)' : '(optional)'}
+            </label>
+            <textarea
+              className={styles.modalTextarea}
+              placeholder="Additional context..."
+              value={reasonNote}
+              onChange={e => setReasonNote(e.target.value)}
+              rows={3}
+            />
+            <div className={styles.modalActions}>
+              <button className={styles.modalCancelBtn} onClick={() => setReasonModal(null)}>
+                Cancel
+              </button>
+              <button
+                className={styles.modalConfirmBtn}
+                onClick={handleReasonSubmit}
+                disabled={!reasonType || (reasonType === 'Other' && !reasonNote.trim()) || isPending}
+                style={{
+                  backgroundColor: reasonModal.toStage === 'Blacklisted' ? '#ef4444' : '#f59e0b',
+                }}
+              >
+                {isPending ? 'Saving...' : `Confirm ${reasonModal.toStage === 'Blacklisted' ? 'Blacklist' : 'Pause'}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Caution Flag Modal */}
       {cautionModal && (

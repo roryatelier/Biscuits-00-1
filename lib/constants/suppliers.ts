@@ -49,4 +49,9 @@ export const CAPABILITY_BADGE_STYLES: Record<CapabilityType, { bg: string; color
   unknown: { bg: '#f1f5f9', color: '#64748b' },
 };
 
-export const CERT_TYPES = ['GMP', 'ISO', 'Organic', 'Halal', 'Vegan', 'COSMOS'] as const;
+export const CERT_TYPES = [
+  'ISO_9001', 'ISO_14001', 'ISO_22716',
+  'GMP', 'FDA', 'FDA_OTC', 'TGA',
+  'SMETA', 'BSCI', 'FSC',
+  'organic', 'vegan', 'cruelty_free', 'other',
+] as const;

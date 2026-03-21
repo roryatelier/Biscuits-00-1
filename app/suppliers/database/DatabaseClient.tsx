@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import EmptyState from '@/components/EmptyState/EmptyState';
 import { linkCobaltToAos } from '@/lib/actions/suppliers';
 import {
+  QUALIFICATION_STAGES as STAGES,
+} from '@/lib/supplier-constants';
+import {
   STAGE_COLORS,
   PERMISSION_LABELS,
   PERMISSION_COLORS,
@@ -15,23 +18,39 @@ import {
   type CapabilityType,
 } from '@/lib/constants/suppliers';
 import styles from './Database.module.css';
-
-const STAGES = [
-  'Identified',
-  'Outreached',
-  'Capability Confirmed',
-  'Conditionally Qualified',
-  'Fully Qualified',
-  'Paused',
-  'Blacklisted',
-];
 const CERT_TOOLTIPS: Record<string, string> = {
+  ISO_9001: 'ISO 9001',
+  ISO_14001: 'ISO 14001',
+  ISO_22716: 'ISO 22716',
   GMP: 'GMP',
-  ISO: 'ISO 22716',
-  Organic: 'Vegan/Organic',
-  Halal: 'Halal',
-  Vegan: 'Vegan/Organic',
-  COSMOS: 'COSMOS',
+  FDA: 'FDA',
+  FDA_OTC: 'FDA OTC',
+  TGA: 'TGA',
+  SMETA: 'SMETA',
+  BSCI: 'BSCI',
+  FSC: 'FSC',
+  organic: 'Organic',
+  vegan: 'Vegan',
+  cruelty_free: 'Cruelty Free',
+  other: 'Other',
+};
+
+/** First-letter badge for cert types — use unique abbreviations where first chars collide */
+const CERT_BADGE_LETTERS: Record<string, string> = {
+  ISO_9001: '9',
+  ISO_14001: '1',
+  ISO_22716: '2',
+  GMP: 'G',
+  FDA: 'F',
+  FDA_OTC: 'X',
+  TGA: 'T',
+  SMETA: 'S',
+  BSCI: 'B',
+  FSC: 'C',
+  organic: 'O',
+  vegan: 'V',
+  cruelty_free: 'R',
+  other: '?',
 };
 const AGREEMENT_TYPES = ['NDA', 'MSA', 'IP', 'Payment'];
 const AGREEMENT_TOOLTIPS: Record<string, string> = {
@@ -470,7 +489,7 @@ export default function DatabaseClient({
                               className={`${styles.certDot} ${certSet.has(ct) ? styles.certVerified : styles.certMissing}`}
                               title={CERT_TOOLTIPS[ct] || ct}
                             >
-                              {ct.charAt(0)}
+                              {CERT_BADGE_LETTERS[ct] || ct.charAt(0)}
                             </span>
                           ))}
                         </div>

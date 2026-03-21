@@ -4,6 +4,11 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { transitionSupplierStage } from '@/lib/actions/suppliers';
 import {
+  QUALIFICATION_STAGES as STAGES,
+  TRANSITION_MAP,
+  DROPOUT_REASONS as CANONICAL_DROPOUT_REASONS,
+} from '@/lib/supplier-constants';
+import {
   STAGE_COLORS,
   PERMISSION_LABELS,
   PERMISSION_COLORS,
@@ -13,26 +18,6 @@ import {
   type CapabilityType,
 } from '@/lib/constants/suppliers';
 import styles from './Pipeline.module.css';
-
-const STAGES = [
-  'Identified',
-  'Outreached',
-  'Capability Confirmed',
-  'Conditionally Qualified',
-  'Fully Qualified',
-  'Paused',
-  'Blacklisted',
-] as const;
-
-const TRANSITION_MAP: Record<string, string[]> = {
-  'Identified': ['Outreached', 'Paused', 'Blacklisted'],
-  'Outreached': ['Capability Confirmed', 'Paused', 'Blacklisted'],
-  'Capability Confirmed': ['Conditionally Qualified', 'Outreached', 'Paused', 'Blacklisted'],
-  'Conditionally Qualified': ['Fully Qualified', 'Capability Confirmed', 'Paused', 'Blacklisted'],
-  'Fully Qualified': ['Conditionally Qualified', 'Paused', 'Blacklisted'],
-  'Paused': ['Identified', 'Outreached'],
-  'Blacklisted': [],
-};
 
 type PipelineSupplier = {
   id: string;
@@ -119,16 +104,7 @@ export default function PipelineClient({
     grouped[stage] = displaySuppliers.filter(s => s.qualificationStage === stage);
   }
 
-  const DROPOUT_REASONS = [
-    'Failed capability match',
-    'Failed certification requirements',
-    'Legal hold',
-    'Supplier declined',
-    'Commercial terms not agreed',
-    'Volume mismatch',
-    'Quality concerns',
-    'Other',
-  ];
+  const DROPOUT_REASONS = CANONICAL_DROPOUT_REASONS;
 
   const handleTransition = (supplierId: string, toStage: string) => {
     if (toStage === 'Paused' || toStage === 'Blacklisted') {

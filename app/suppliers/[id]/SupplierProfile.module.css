@@ -719,6 +719,20 @@
   margin-top: 12px;
 }
 
+.modalSelect {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #fff;
+}
+
+.modalSelect:focus {
+  outline: none;
+  border-color: #111;
+}
+
 .modalTextarea {
   width: 100%;
   padding: 8px 12px;
