@@ -10,6 +10,12 @@ export default defineConfig({
         classNameStrategy: 'non-scoped',
       },
     },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'text-summary'],
+      include: ['lib/**/*.ts', 'app/**/*.ts', 'app/**/*.tsx'],
+      exclude: ['**/*.test.*', '**/__tests__/**', 'node_modules/**', '.next/**'],
+    },
   },
   resolve: {
     alias: {
