@@ -98,6 +98,14 @@ export default function SupplierDashboardClient({
           </div>
           <span className={styles.navArrow}>&rarr;</span>
         </button>
+        <button className={styles.navCard} onClick={() => router.push('/suppliers/import')}>
+          <span className={styles.navIcon}>&#x1F4E5;</span>
+          <div>
+            <p className={styles.navCardTitle}>Import</p>
+            <p className={styles.navCardDesc}>Bulk import from CSV</p>
+          </div>
+          <span className={styles.navArrow}>&rarr;</span>
+        </button>
       </div>
 
       <div className={styles.gridRow}>
@@ -189,6 +197,17 @@ export default function SupplierDashboardClient({
               ))}
             </tbody>
           </table>
+        </div>
+        <div className={styles.heatmapLegend}>
+          <span className={styles.legendItem}>
+            <span className={`${styles.legendSwatch} ${styles.heatmapCellRed}`} /> 0 = gap (red)
+          </span>
+          <span className={styles.legendItem}>
+            <span className={`${styles.legendSwatch} ${styles.heatmapCellAmber}`} /> 1-2 = limited (amber)
+          </span>
+          <span className={styles.legendItem}>
+            <span className={`${styles.legendSwatch} ${styles.heatmapCellGreen}`} /> 3+ = covered (green)
+          </span>
         </div>
       </div>
     </div>

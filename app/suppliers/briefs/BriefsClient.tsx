@@ -136,6 +136,7 @@ export default function BriefsClient({ briefs }: { briefs: Brief[] }) {
   const [briefDetail, setBriefDetail] = useState<BriefDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
 
   useEffect(() => {
     if (!selectedBriefId) {
@@ -261,7 +262,17 @@ export default function BriefsClient({ briefs }: { briefs: Brief[] }) {
 
           {briefDetail && !isLoading && (
             <div>
-              <h2 className={styles.detailTitle}>{briefDetail.name}</h2>
+              <div className={styles.detailHeader}>
+                <h2 className={styles.detailTitle}>{briefDetail.name}</h2>
+                {briefDetail.assignments.length >= 2 && (
+                  <button
+                    className={`${styles.compareToggle} ${compareMode ? styles.compareToggleActive : ''}`}
+                    onClick={() => setCompareMode(!compareMode)}
+                  >
+                    {compareMode ? 'List View' : 'Compare'}
+                  </button>
+                )}
+              </div>
               {briefDetail.customerName && (
                 <p className={styles.detailMeta}>Customer: {briefDetail.customerName}</p>
               )}
@@ -285,6 +296,75 @@ export default function BriefsClient({ briefs }: { briefs: Brief[] }) {
 
                 {briefDetail.assignments.length === 0 ? (
                   <p className={styles.emptyText}>No suppliers assigned to this brief.</p>
+                ) : compareMode ? (
+                  <div className={styles.compareTableWrapper}>
+                    <table className={styles.compareTable}>
+                      <thead>
+                        <tr>
+                          <th className={styles.compareAttrHeader}>Attribute</th>
+                          {briefDetail.assignments.map(a => (
+                            <th key={a.id} className={styles.compareSupplierHeader}>
+                              <button
+                                className={styles.compareSupplierLink}
+                                onClick={() => router.push(`/suppliers/${a.aosSupplier.id}`)}
+                              >
+                                {a.aosSupplier.companyName}
+                              </button>
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className={styles.compareAttrLabel}>Stage</td>
+                          {briefDetail.assignments.map(a => (
+                            <td key={a.id} className={styles.compareCell}>{a.aosSupplier.qualificationStage}</td>
+                          ))}
+                        </tr>
+                        <tr>
+                          <td className={styles.compareAttrLabel}>Country</td>
+                          {briefDetail.assignments.map(a => (
+                            <td key={a.id} className={styles.compareCell}>{a.aosSupplier.factoryCountry || '--'}</td>
+                          ))}
+                        </tr>
+                        <tr>
+                          <td className={styles.compareAttrLabel}>Categories</td>
+                          {briefDetail.assignments.map(a => (
+                            <td key={a.id} className={styles.compareCell}>{a.aosSupplier.categories.join(', ') || '--'}</td>
+                          ))}
+                        </tr>
+                        <tr>
+                          <td className={styles.compareAttrLabel}>Certifications</td>
+                          {briefDetail.assignments.map(a => (
+                            <td key={a.id} className={styles.compareCell}>
+                              {a.aosSupplier.certifications.length > 0
+                                ? a.aosSupplier.certifications.map(c => c.certType).join(', ')
+                                : '--'}
+                            </td>
+                          ))}
+                        </tr>
+                        <tr>
+                          <td className={styles.compareAttrLabel}>Agreements</td>
+                          {briefDetail.assignments.map(a => {
+                            const signed = a.aosSupplier.agreements.filter(ag => ag.status === 'signed').map(ag => ag.agreementType);
+                            return (
+                              <td key={a.id} className={styles.compareCell}>
+                                {signed.length > 0 ? signed.join(', ') : '--'}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                        <tr>
+                          <td className={styles.compareAttrLabel}>Match Score</td>
+                          {briefDetail.assignments.map(a => (
+                            <td key={a.id} className={styles.compareCell}>
+                              {a.matchScore != null ? `${a.matchScore}%` : 'N/A'}
+                            </td>
+                          ))}
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 ) : (
                   <div className={styles.supplierList}>
                     {briefDetail.assignments.map(a => {

@@ -98,6 +98,27 @@ const ENTRY_TYPE_ICONS: Record<string, string> = {
   note: '\uD83D\uDCDD',
 };
 
+type ActivityFilter = 'all' | 'stage_change' | 'cert' | 'agreement' | 'manual' | 'system';
+
+const ACTIVITY_FILTERS: { key: ActivityFilter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'stage_change', label: 'Stage Change' },
+  { key: 'cert', label: 'Cert' },
+  { key: 'agreement', label: 'Agreement' },
+  { key: 'manual', label: 'Manual' },
+  { key: 'system', label: 'System' },
+];
+
+function matchesActivityFilter(activity: ActivityEntry, filter: ActivityFilter): boolean {
+  if (filter === 'all') return true;
+  if (filter === 'stage_change') return activity.type === 'stage_change';
+  if (filter === 'cert') return activity.type.startsWith('cert_');
+  if (filter === 'agreement') return activity.type.startsWith('agreement_');
+  if (filter === 'manual') return activity.type === 'manual_entry';
+  if (filter === 'system') return activity.type === 'caution_flag_set' || activity.type === 'caution_flag_removed' || activity.type === 'system';
+  return true;
+}
+
 type TabName = 'overview' | 'certifications' | 'agreements' | 'briefs' | 'activity';
 
 export default function SupplierProfileClient({ supplier, activities = [] }: { supplier: SupplierProfile; activities?: ActivityEntry[] }) {
@@ -113,6 +134,8 @@ export default function SupplierProfileClient({ supplier, activities = [] }: { s
   const [activityEntryType, setActivityEntryType] = useState('note');
   const [activityDescription, setActivityDescription] = useState('');
   const [activityDate, setActivityDate] = useState(new Date().toISOString().split('T')[0]);
+  // Activity filter
+  const [activityFilter, setActivityFilter] = useState<ActivityFilter>('all');
   // Caution flag modal
   const [cautionModal, setCautionModal] = useState(false);
   const [cautionNote, setCautionNote] = useState('');
@@ -552,6 +575,18 @@ export default function SupplierProfileClient({ supplier, activities = [] }: { s
               </button>
             </div>
 
+            <div className={styles.activityFilters}>
+              {ACTIVITY_FILTERS.map(f => (
+                <button
+                  key={f.key}
+                  className={`${styles.filterChip} ${activityFilter === f.key ? styles.filterChipActive : ''}`}
+                  onClick={() => setActivityFilter(f.key)}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
             {showAddActivity && (
               <div className={styles.addForm}>
                 <div className={styles.formRow}>
@@ -614,7 +649,7 @@ export default function SupplierProfileClient({ supplier, activities = [] }: { s
               <p className={styles.emptyValue}>No activity recorded yet.</p>
             ) : (
               <div className={styles.activityTimeline}>
-                {activities.map(a => {
+                {activities.filter(a => matchesActivityFilter(a, activityFilter)).map(a => {
                   const entryType = a.metadata?.entryType || a.type;
                   const icon = ENTRY_TYPE_ICONS[entryType] || '\u25CF';
                   const date = new Date(a.createdAt);

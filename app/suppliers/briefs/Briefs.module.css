@@ -430,3 +430,112 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Detail header with compare toggle */
+.detailHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.compareToggle {
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  background: #f0f0f0;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.compareToggle:hover {
+  border-color: #111;
+  color: #111;
+}
+
+.compareToggleActive {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.compareToggleActive:hover {
+  background: #333;
+  border-color: #333;
+}
+
+/* Compare table */
+.compareTableWrapper {
+  overflow-x: auto;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+}
+
+.compareTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.compareAttrHeader {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e5e5e5;
+  background: #fafafa;
+  min-width: 120px;
+}
+
+.compareSupplierHeader {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  border-bottom: 1px solid #e5e5e5;
+  background: #fafafa;
+  min-width: 140px;
+}
+
+.compareSupplierLink {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-family: inherit;
+}
+
+.compareSupplierLink:hover {
+  color: #3b82f6;
+}
+
+.compareAttrLabel {
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+  white-space: nowrap;
+}
+
+.compareCell {
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: top;
+}

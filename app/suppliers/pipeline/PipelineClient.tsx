@@ -253,7 +253,7 @@ export default function PipelineClient({
                         onClick={() => router.push(`/suppliers/${s.id}`)}
                       >
                         <div className={styles.cardNameRow}>
-                          <span className={`${styles.cardName} ${isPausedCaution ? styles.cardNameMuted : ''}`}>{s.companyName}</span>
+                          <span className={`${styles.cardName} ${isPausedCaution ? styles.cardNameMuted : ''}`} title={s.companyName}>{s.companyName}</span>
                           {s.cautionFlag && (
                             <span className={`${styles.cautionIcon} ${isPausedCaution ? styles.cautionIconProminent : ''}`} title="Caution flag">&#x26A0;</span>
                           )}

@@ -43,6 +43,20 @@ export default function ImportClient() {
   const [result, setResult] = useState<{ created: number; certsCreated: number; agreementsCreated: number; contactsCreated: number } | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const handleDownloadTemplate = () => {
+    const csvContent = [
+      'Company Name,Country,Categories,Capability Type,MOQ,Key Brands,Certifications,Agreements,Contact Name,Contact Email',
+      'Example Corp,Australia,"face-care,spf",manufacturer,10000,"Brand A,Brand B","GMP,ISO","NDA,MSA",Jane Smith,jane@example.com',
+    ].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'supplier-import-template.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -100,7 +114,16 @@ export default function ImportClient() {
       {step === 'upload' && (
         <div className={styles.uploadSection}>
           <div className={styles.uploadCard}>
-            <h2 className={styles.sectionTitle}>Upload CSV File</h2>
+            <div className={styles.uploadHeaderRow}>
+              <h2 className={styles.sectionTitle}>Upload CSV File</h2>
+              <button
+                type="button"
+                className={styles.templateLink}
+                onClick={handleDownloadTemplate}
+              >
+                Download template
+              </button>
+            </div>
             <input
               type="file"
               accept=".csv"

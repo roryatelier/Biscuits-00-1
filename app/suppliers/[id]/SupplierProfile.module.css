@@ -520,6 +520,43 @@
   color: #bbb;
 }
 
+/* Activity Filters */
+.activityFilters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.filterChip {
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+  background: #f0f0f0;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filterChip:hover {
+  border-color: #111;
+  color: #111;
+}
+
+.filterChipActive {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.filterChipActive:hover {
+  background: #333;
+  border-color: #333;
+  color: #fff;
+}
+
 /* Activity Timeline */
 .activityTimeline {
   display: flex;
