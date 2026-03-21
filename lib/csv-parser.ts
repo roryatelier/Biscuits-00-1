@@ -67,19 +67,84 @@ export const COLUMN_MAP: Record<string, string> = {
   'phone': 'contactMobile',
 };
 
+/**
+ * RFC 4180 compliant CSV parser.
+ * Handles quoted fields containing commas, newlines, and escaped quotes (doubled "").
+ */
 export function parseCsvText(text: string): CsvRow[] {
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  if (lines.length < 2) return [];
+  const grid = parseCsvGrid(text);
+  if (grid.length < 2) return [];
 
-  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  const headers = grid[0].map(h => h.trim());
   const rows: CsvRow[] = [];
 
-  for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+  for (let i = 1; i < grid.length; i++) {
+    const values = grid[i];
+    // Skip entirely empty rows
+    if (values.every(v => v.trim() === '')) continue;
     const row: CsvRow = {};
     headers.forEach((h, idx) => {
-      row[h] = values[idx] || '';
+      row[h] = (values[idx] ?? '').trim();
     });
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+/** Low-level RFC 4180 parser — returns a grid of string[][] */
+function parseCsvGrid(text: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = '';
+  let inQuotes = false;
+  let i = 0;
+
+  while (i < text.length) {
+    const ch = text[i];
+
+    if (inQuotes) {
+      if (ch === '"') {
+        if (i + 1 < text.length && text[i + 1] === '"') {
+          // Escaped quote
+          field += '"';
+          i += 2;
+        } else {
+          // End of quoted field
+          inQuotes = false;
+          i++;
+        }
+      } else {
+        field += ch;
+        i++;
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true;
+        i++;
+      } else if (ch === ',') {
+        row.push(field);
+        field = '';
+        i++;
+      } else if (ch === '\r') {
+        // Skip \r (handle \r\n and bare \r)
+        i++;
+      } else if (ch === '\n') {
+        row.push(field);
+        field = '';
+        rows.push(row);
+        row = [];
+        i++;
+      } else {
+        field += ch;
+        i++;
+      }
+    }
+  }
+
+  // Flush last row if there's remaining content
+  if (field.length > 0 || row.length > 0) {
+    row.push(field);
     rows.push(row);
   }
 

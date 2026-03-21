@@ -4,6 +4,7 @@ import {
   TRANSITION_MAP,
   DROPOUT_REASONS,
   isValidTransition,
+  getValidTransitions,
   requiresReason,
 } from '@/lib/supplier-constants';
 
@@ -69,6 +70,10 @@ describe('Stage Transitions', () => {
     it('Paused → Fully Qualified is invalid (must re-enter early)', () => {
       expect(isValidTransition('Paused', 'Fully Qualified')).toBe(false);
     });
+
+    it('Paused → Blacklisted is invalid', () => {
+      expect(isValidTransition('Paused', 'Blacklisted')).toBe(false);
+    });
   });
 
   // ── Blacklisted is terminal ──────────────────────────────
@@ -113,12 +118,36 @@ describe('Stage Transitions', () => {
       expect(requiresReason('Blacklisted')).toBe(true);
     });
 
-    it('Outreached does not require a reason', () => {
-      expect(requiresReason('Outreached')).toBe(false);
+    it.each([
+      'Identified',
+      'Outreached',
+      'Capability Confirmed',
+      'Conditionally Qualified',
+      'Fully Qualified',
+    ])('%s does not require a reason', (stage) => {
+      expect(requiresReason(stage)).toBe(false);
+    });
+  });
+
+  // ── getValidTransitions ────────────────────────────────────
+
+  describe('getValidTransitions', () => {
+    it('returns correct options for Identified', () => {
+      expect(getValidTransitions('Identified')).toEqual(['Outreached', 'Paused', 'Blacklisted']);
     });
 
-    it('Fully Qualified does not require a reason', () => {
-      expect(requiresReason('Fully Qualified')).toBe(false);
+    it('returns correct options for Capability Confirmed', () => {
+      expect(getValidTransitions('Capability Confirmed')).toEqual([
+        'Conditionally Qualified', 'Outreached', 'Paused', 'Blacklisted',
+      ]);
+    });
+
+    it('returns empty array for unknown stage', () => {
+      expect(getValidTransitions('NonExistent')).toEqual([]);
+    });
+
+    it('returns empty array for Blacklisted', () => {
+      expect(getValidTransitions('Blacklisted')).toEqual([]);
     });
   });
 

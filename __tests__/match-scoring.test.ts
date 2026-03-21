@@ -147,4 +147,25 @@ describe('Match Scoring', () => {
     );
     expect(score).toBe(0);
   });
+
+  // ── Pending verification status ────────────────────────────
+
+  it('only verified and non-expired certs count as matched', () => {
+    const certs = [
+      makeCert('ISO 22716', 'verified', null),      // no expiry = valid
+      makeCert('GMP', 'pending', future),            // pending = not matched
+      makeCert('Halal', 'verified', past),           // expired = not matched
+    ];
+    const { score, breakdown } = computeMatchScorePure(certs, ['ISO 22716', 'GMP', 'Halal']);
+    expect(score).toBe(33);
+    expect(breakdown).toEqual({ 'ISO 22716': true, GMP: false, Halal: false });
+  });
+
+  // ── Supplier with 0 certs ─────────────────────────────────
+
+  it('supplier with 0 certs against brief with requirements returns 0', () => {
+    const { score, breakdown } = computeMatchScorePure([], ['GMP', 'ISO 22716']);
+    expect(score).toBe(0);
+    expect(breakdown).toEqual({ GMP: false, 'ISO 22716': false });
+  });
 });

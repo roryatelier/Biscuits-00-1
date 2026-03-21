@@ -221,6 +221,58 @@ describe('CSV Import', () => {
     });
   });
 
+  // ── parseRow direct tests ───────────────────────────────
+
+  describe('parseRow direct tests', () => {
+    it('valid row parses correctly', () => {
+      const row = { 'Company Name': 'Acme', 'Country': 'Australia', 'Categories': 'Skincare;Haircare', 'MOQ': '1000' };
+      const result = parseRow(row, 2);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.companyName).toBe('Acme');
+        expect(result.country).toBe('Australia');
+        expect(result.categories).toEqual(['Skincare', 'Haircare']);
+        expect(result.moq).toBe(1000);
+        expect(result.row).toBe(2);
+      }
+    });
+
+    it('valid numeric MOQ is parsed', () => {
+      const row = { 'Company Name': 'Acme', 'Country': 'AU', 'MOQ': '500' };
+      const result = parseRow(row, 2);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.moq).toBe(500);
+      }
+    });
+
+    it('missing MOQ results in null', () => {
+      const row = { 'Company Name': 'Acme', 'Country': 'AU' };
+      const result = parseRow(row, 2);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.moq).toBeNull();
+      }
+    });
+  });
+
+  // ── Column mapping extras ──────────────────────────────────
+
+  describe('mapColumns extras', () => {
+    it('unknown column name is preserved as-is', () => {
+      const mapped = mapColumns({ 'Custom Field': 'value' });
+      expect(mapped['Custom Field']).toBe('value');
+    });
+  });
+
+  // ── parseList extras ───────────────────────────────────────
+
+  describe('parseList extras', () => {
+    it('trims whitespace from items', () => {
+      expect(parseList('  A ,  B  ')).toEqual(['A', 'B']);
+    });
+  });
+
   // ── parseCsvText low-level tests ─────────────────────────
 
   describe('parseCsvText', () => {
@@ -242,6 +294,77 @@ describe('CSV Import', () => {
 
     it('returns empty for empty string', () => {
       expect(parseCsvText('')).toEqual([]);
+    });
+  });
+
+  // ── RFC 4180: quoted fields with commas ─────────────────
+
+  describe('RFC 4180 quoted field handling', () => {
+    it('handles commas inside quoted fields', () => {
+      const text = csv(
+        'Company Name,Country,Categories',
+        '"Acme Corp","Australia","Skincare, Haircare"',
+      );
+
+      const rows = parseCsvText(text);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]['Company Name']).toBe('Acme Corp');
+      expect(rows[0]['Categories']).toBe('Skincare, Haircare');
+    });
+
+    it('handles newlines inside quoted fields', () => {
+      const text = 'Company Name,Country,Notes\n"Acme Corp","Australia","Line one\nLine two"';
+
+      const rows = parseCsvText(text);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]['Notes']).toBe('Line one\nLine two');
+    });
+
+    it('handles escaped quotes (doubled "")', () => {
+      const text = csv(
+        'Company Name,Country,Notes',
+        '"Acme Corp","Australia","They said ""hello"""',
+      );
+
+      const rows = parseCsvText(text);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]['Notes']).toBe('They said "hello"');
+    });
+
+    it('full pipeline: quoted commas do not corrupt supplier categories', () => {
+      const text = 'Company Name,Country,Categories\n"Acme Corp","Australia","Skincare, Haircare, Fragrance"';
+
+      const result = parseCsvForPreview(text);
+      expect('error' in result).toBe(false);
+      if ('error' in result) return;
+
+      expect(result.parsed).toHaveLength(1);
+      const s = result.parsed[0];
+      expect(s.companyName).toBe('Acme Corp');
+      // parseList splits on commas inside the field value
+      expect(s.categories).toEqual(['Skincare', 'Haircare', 'Fragrance']);
+    });
+
+    it('handles CRLF line endings', () => {
+      const text = 'Company Name,Country\r\nAcme Corp,Australia\r\nBeta Inc,NZ';
+
+      const rows = parseCsvText(text);
+      expect(rows).toHaveLength(2);
+      expect(rows[0]['Company Name']).toBe('Acme Corp');
+      expect(rows[1]['Company Name']).toBe('Beta Inc');
+    });
+
+    it('mixed quoted and unquoted fields', () => {
+      const text = csv(
+        'Company Name,Country,Categories',
+        '"Acme, Inc.",Australia,Skincare',
+      );
+
+      const rows = parseCsvText(text);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]['Company Name']).toBe('Acme, Inc.');
+      expect(rows[0]['Country']).toBe('Australia');
+      expect(rows[0]['Categories']).toBe('Skincare');
     });
   });
 
