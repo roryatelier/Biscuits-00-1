@@ -314,6 +314,7 @@ describe('supplier-briefs', () => {
                 include: {
                   certifications: { select: { certType: true, verificationStatus: true, expiryDate: true } },
                   agreements: { select: { agreementType: true, status: true } },
+                  cobaltSupplier: { select: { id: true, matchedProducts: true } },
                 },
               },
             },

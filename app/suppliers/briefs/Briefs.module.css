@@ -473,12 +473,22 @@
   overflow-x: auto;
   border: 1px solid #e5e5e5;
   border-radius: 8px;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .compareTable {
   width: 100%;
+  min-width: max-content;
   border-collapse: collapse;
   font-size: 13px;
+  table-layout: fixed;
+}
+
+.compareStickyCol {
+  position: sticky;
+  left: 0;
+  z-index: 2;
 }
 
 .compareAttrHeader {
@@ -489,9 +499,10 @@
   color: #888;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 2px solid #e5e5e5;
   background: #fafafa;
-  min-width: 120px;
+  min-width: 140px;
+  width: 140px;
 }
 
 .compareSupplierHeader {
@@ -500,9 +511,10 @@
   font-size: 13px;
   font-weight: 600;
   color: #111;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 2px solid #e5e5e5;
   background: #fafafa;
-  min-width: 140px;
+  min-width: 170px;
+  width: 170px;
 }
 
 .compareSupplierLink {
@@ -526,10 +538,29 @@
   padding: 8px 14px;
   font-size: 12px;
   font-weight: 600;
+  color: #555;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+  white-space: nowrap;
+}
+
+.compareCertLabel {
+  padding: 6px 14px 6px 28px;
+  font-size: 11px;
+  font-weight: 500;
   color: #888;
   border-bottom: 1px solid #f0f0f0;
   background: #fafafa;
   white-space: nowrap;
+}
+
+.compareSectionLabel {
+  font-weight: 700;
+  color: #555;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid #e5e5e5;
 }
 
 .compareCell {
@@ -537,5 +568,108 @@
   font-size: 13px;
   color: #333;
   border-bottom: 1px solid #f0f0f0;
-  vertical-align: top;
+  vertical-align: middle;
+}
+
+.compareRowAlt td {
+  background-color: #f9fafb;
+}
+
+.compareRowAlt .compareStickyCol {
+  background-color: #f4f5f6;
+}
+
+/* Stage badge in compare table */
+.stageBadge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+/* Capability badge in compare table */
+.capBadge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* Permission level badge */
+.permLevel {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+/* Cert status icons */
+.certVerified {
+  color: #16a34a;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.certUnverified {
+  color: #f59e0b;
+  font-size: 14px;
+}
+
+.certExpired {
+  color: #ef4444;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.certNone {
+  color: #d1d5db;
+  font-size: 14px;
+}
+
+/* Agreement status */
+.agreementSigned {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #16a34a;
+  background: #dcfce7;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.agreementSent {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #d97706;
+  background: #fef3c7;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.agreementNone {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* Match score badge inline (compare table) */
+.scoreBadgeInline {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 5px;
+}
+
+/* Empty value placeholder */
+.emptyVal {
+  color: #d1d5db;
 }
