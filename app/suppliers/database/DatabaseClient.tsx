@@ -26,6 +26,7 @@ const STAGE_SORT_ORDER: Record<string, number> = {
   'Identified': 4,
   'Paused': 5,
   'Blacklisted': 6,
+  'Historical': 7,
 };
 
 export default function DatabaseClient({

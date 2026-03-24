@@ -12,6 +12,7 @@ export const STAGE_COLORS: Record<string, string> = {
   'Fully Qualified': '#22c55e',
   'Paused': '#94a3b8',
   'Blacklisted': '#ef4444',
+  'Historical': '#6b7280',
 };
 
 export const PERMISSION_LABELS: Record<PermissionLevel, string> = {

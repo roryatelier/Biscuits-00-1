@@ -10,6 +10,7 @@ export const QUALIFICATION_STAGES = [
   'Fully Qualified',
   'Paused',
   'Blacklisted',
+  'Historical',
 ] as const;
 
 export const TRANSITION_MAP: Record<string, string[]> = {
@@ -20,6 +21,7 @@ export const TRANSITION_MAP: Record<string, string[]> = {
   'Fully Qualified':         ['Conditionally Qualified', 'Paused', 'Blacklisted'],
   'Paused':                  ['Identified', 'Outreached'],
   'Blacklisted':             [],
+  'Historical':              [],
 };
 
 export const DROPOUT_REASONS = [

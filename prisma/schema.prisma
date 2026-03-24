@@ -563,12 +563,44 @@ model AosSupplier {
   factoryCountry        String?
   // Lead times & pricing
   customSampleLeadTimeDays   Int?
-  productionLeadTimeDays     Int?
+  productionLeadTimeDayMin   Int?
+  productionLeadTimeDayMax   Int?
+  productionLeadTimeInfo     String?
   samplePriceMin        Float?  // USD
   samplePriceMax        Float?  // USD
+  // Active SKUs
+  activeSkus            Json    @default("[]")  // string[]
+  // Dates
+  dateOutreached        DateTime?
+  dateQualified         DateTime?
+  lastContactedAt       DateTime?
   // Flags
   cautionFlag           Boolean @default(false)
   cautionNote           String?
+  // Identity & legacy
+  supplierCode          String? @unique
+  legacyId              Int?
+  // Sourcing
+  acquisitionSource     String?
+  currency              String? @default("USD")
+  moqInfo               String?
+  // Region & market
+  region                String?
+  marketExperience      Json    @default("[]")  // string[]
+  // Code of Conduct
+  cocAcknowledged       Boolean @default(false)
+  cocLink               String?
+  cocDateAccepted       DateTime?
+  // Other
+  websiteUrl            String?
+  ipOwnership           String?
+  fillCapabilities      Json    @default("[]")  // string[]
+  fillPackagingNotes    String?
+  atelierBrands         Json    @default("[]")  // string[]
+  atelierNote           String?
+  factoryNotes          String?
+  paymentTerms          String?
+
   cobaltSupplierId      String? @unique
   cobaltEnabled         Boolean @default(false)
   teamId                String
@@ -579,6 +611,7 @@ model AosSupplier {
   agreements            Agreement[]
   briefAssignments      SupplierBriefAssignment[]
   contacts              SupplierContact[]
+  audits                FactoryAudit[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -594,6 +627,7 @@ model Certification {
   certType           String    // ISO_9001, ISO_14001, ISO_45001, ISO_22716,
                                // GMP, FDA, FDA_OTC, TGA, SMETA, BSCI, FSC,
                                // organic, vegan, cruelty_free, other
+  certCategory       String?   // quality, regulatory, sustainability, ethics
   certBody           String?
   scope              String?
   issueDate          DateTime?
@@ -617,6 +651,30 @@ model Agreement {
   status          String  @default("not_started") // not_started, sent, signed
   sentAt          DateTime?
   signedAt        DateTime?
+  documentLink    String?
+  startDate       DateTime?
+  expiryDate      DateTime?
+  nonCircumventMonths Int?
+  notes           String?
+
+  aosSupplier AosSupplier @relation(fields: [aosSupplierId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([aosSupplierId])
+}
+
+model FactoryAudit {
+  id              String    @id @default(cuid())
+  aosSupplierId   String
+  score           Float?
+  auditedOn       DateTime?
+  auditor         String?
+  location        String?
+  visitType       String?
+  actionItems     String?
+  followUp        String?
 
   aosSupplier AosSupplier @relation(fields: [aosSupplierId], references: [id], onDelete: Cascade)
 

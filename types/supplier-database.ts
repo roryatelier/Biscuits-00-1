@@ -7,6 +7,7 @@ import type { CapabilityType } from '@/lib/constants/suppliers';
 export type CertInfo = {
   id?: string;
   certType: string;
+  certCategory?: string | null;
   verificationStatus: string;
   expiryDate?: string | null;
 };
@@ -15,6 +16,11 @@ export type AgreementInfo = {
   id?: string;
   agreementType: string;
   status: string;
+  documentLink?: string | null;
+  startDate?: string | null;
+  expiryDate?: string | null;
+  nonCircumventMonths?: number | null;
+  notes?: string | null;
 };
 
 export type MatchedProduct = {
@@ -25,17 +31,66 @@ export type MatchedProduct = {
   url?: string;
 };
 
+export type FactoryAuditInfo = {
+  id?: string;
+  score?: number | null;
+  auditedOn?: string | null;
+  auditor?: string | null;
+  location?: string | null;
+  visitType?: string | null;
+  actionItems?: string | null;
+  followUp?: string | null;
+};
+
 export type AosSupplier = {
   id: string;
   companyName: string;
+  companyLegalName?: string | null;
   qualificationStage: string;
   categories: string[];
+  subcategories?: string[];
   moq: number | null;
+  moqInfo?: string | null;
   cautionFlag: boolean;
+  cautionNote?: string | null;
   cobaltEnabled: boolean;
   capabilityType: string;
+  // Lead times
+  productionLeadTimeDayMin?: number | null;
+  productionLeadTimeDayMax?: number | null;
+  productionLeadTimeInfo?: string | null;
+  // SKUs
+  activeSkus?: string[];
+  // Dates
+  dateOutreached?: string | null;
+  dateQualified?: string | null;
+  lastContactedAt?: string | null;
+  // Identity & legacy
+  supplierCode?: string | null;
+  legacyId?: number | null;
+  // Sourcing
+  acquisitionSource?: string | null;
+  currency?: string | null;
+  // Region & market
+  region?: string | null;
+  marketExperience?: string[];
+  // Code of Conduct
+  cocAcknowledged?: boolean;
+  cocLink?: string | null;
+  cocDateAccepted?: string | null;
+  // Other
+  websiteUrl?: string | null;
+  ipOwnership?: string | null;
+  fillCapabilities?: string[];
+  fillPackagingNotes?: string | null;
+  atelierBrands?: string[];
+  atelierNote?: string | null;
+  factoryNotes?: string | null;
+  paymentTerms?: string | null;
+  // Relations
   certifications: CertInfo[];
   agreements: AgreementInfo[];
+  audits?: FactoryAuditInfo[];
   cobaltSupplier: { id: string; matchedProductsCount: number } | null;
   briefCount: number;
 };
