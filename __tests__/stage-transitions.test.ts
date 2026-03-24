@@ -95,7 +95,7 @@ describe('Stage Transitions', () => {
 
   describe('any active stage can transition to Paused and Blacklisted', () => {
     const activeStages = QUALIFICATION_STAGES.filter(
-      s => s !== 'Paused' && s !== 'Blacklisted',
+      s => s !== 'Paused' && s !== 'Blacklisted' && s !== 'Historical',
     );
 
     it.each(activeStages)('%s → Paused is valid', (from) => {
@@ -153,8 +153,8 @@ describe('Stage Transitions', () => {
 
   // ── Every stage has at least one transition (except Blacklisted) ──
 
-  describe('every stage has at least one valid transition (except Blacklisted)', () => {
-    const nonTerminal = QUALIFICATION_STAGES.filter(s => s !== 'Blacklisted');
+  describe('every stage has at least one valid transition (except Blacklisted and Historical)', () => {
+    const nonTerminal = QUALIFICATION_STAGES.filter(s => s !== 'Blacklisted' && s !== 'Historical');
 
     it.each(nonTerminal)('%s has at least one transition', (stage) => {
       expect(TRANSITION_MAP[stage].length).toBeGreaterThan(0);
@@ -164,8 +164,8 @@ describe('Stage Transitions', () => {
   // ── Constants integrity ──────────────────────────────────
 
   describe('constants integrity', () => {
-    it('QUALIFICATION_STAGES has 7 entries', () => {
-      expect(QUALIFICATION_STAGES).toHaveLength(7);
+    it('QUALIFICATION_STAGES has 8 entries', () => {
+      expect(QUALIFICATION_STAGES).toHaveLength(8);
     });
 
     it('TRANSITION_MAP covers every stage', () => {

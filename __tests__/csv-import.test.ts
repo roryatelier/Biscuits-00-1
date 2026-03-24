@@ -5,6 +5,7 @@ import {
   parseRow,
   parseList,
   parseCsvForPreview,
+  normaliseCertType,
 } from '@/lib/csv-parser';
 
 // Helper: build a single-row CSV string
@@ -33,7 +34,7 @@ describe('CSV Import', () => {
     expect(s.capabilityType).toBe('turnkey');
     expect(s.moq).toBe(5000);
     expect(s.keyBrands).toEqual(['Brand A', 'Brand B']);
-    expect(s.certTypes).toEqual(['ISO 22716', 'GMP']);
+    expect(s.certTypes).toEqual(['ISO_22716', 'GMP']);
   });
 
   // ── Missing company name → rejected ──────────────────────
@@ -386,5 +387,367 @@ describe('CSV Import', () => {
     expect(result.parsed[0].row).toBe(2);
     expect(result.rejected[0].row).toBe(3);
     expect(result.parsed[1].row).toBe(4);
+  });
+
+  // ── parseCautionFlags (tested via parseRow with Flags column) ─────
+
+  describe('parseCautionFlags via parseRow', () => {
+    it('empty/no flags → cautionFlag false', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Flags': '' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.cautionFlag).toBe(false);
+        expect(result.cautionNote).toBeNull();
+      }
+    });
+
+    it('all _NA flags → cautionFlag false', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Flags': '["CERT_NA","NDA_NA"]' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.cautionFlag).toBe(false);
+      }
+    });
+
+    it('CERT_EXPIRED mixed with _NA → cautionFlag true with human-readable note', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Flags': '["CERT_EXPIRED","CERT_NA"]' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.cautionFlag).toBe(true);
+        expect(result.cautionNote).toContain('Certificate expired');
+      }
+    });
+
+    it('NDA_EXPIRED → cautionFlag true with "NDA expired"', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Flags': '["NDA_EXPIRED"]' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.cautionFlag).toBe(true);
+        expect(result.cautionNote).toBe('NDA expired');
+      }
+    });
+
+    it('malformed JSON → fallback to comma parsing', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Flags': 'CERT_EXPIRED, NDA_EXPIRED' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.cautionFlag).toBe(true);
+        expect(result.cautionNote).toContain('CERT_EXPIRED');
+      }
+    });
+  });
+
+  // ── parseNdaData (tested via parseRow with nda_data column) ───────
+
+  describe('parseNdaData via parseRow', () => {
+    it('valid JSON with link and status → ndaLink and ndaStatus populated', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'nda_data': '{"link":"http://example.com/nda","status":"Signed"}' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.ndaLink).toBe('http://example.com/nda');
+        expect(result.ndaStatus).toBe('Signed');
+      }
+    });
+
+    it('null link with Progressing status', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'nda_data': '{"link":null,"status":"Progressing"}' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.ndaLink).toBeNull();
+        expect(result.ndaStatus).toBe('Progressing');
+      }
+    });
+
+    it('empty/undefined → both null', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.ndaLink).toBeNull();
+        expect(result.ndaStatus).toBeNull();
+      }
+    });
+
+    it('malformed JSON → both null', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'nda_data': '{bad json' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.ndaLink).toBeNull();
+        expect(result.ndaStatus).toBeNull();
+      }
+    });
+  });
+
+  // ── parseFactoryAuditData (tested via parseRow) ───────────────────
+
+  describe('parseFactoryAuditData via parseRow', () => {
+    it('valid JSON with score, audited_on, auditor → structured result', () => {
+      const row = {
+        'Company Name': 'Test', 'Country': 'AU',
+        'Factory audit data': '{"score":85,"audited_on":"2025-06-01","auditor":"SGS","location":"Shenzhen","visit":"on-site","action":"Fix ventilation","follow_up":"2025-12-01"}',
+      };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.factoryAuditData).not.toBeNull();
+        expect(result.factoryAuditData!.score).toBe(85);
+        expect(result.factoryAuditData!.auditor).toBe('SGS');
+        expect(result.factoryAuditData!.location).toBe('Shenzhen');
+        expect(result.factoryAuditData!.visitType).toBe('on-site');
+        expect(result.factoryAuditData!.actionItems).toBe('Fix ventilation');
+      }
+    });
+
+    it('empty JSON fields → nulls', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Factory audit data': '{}' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.factoryAuditData).not.toBeNull();
+        expect(result.factoryAuditData!.score).toBeNull();
+        expect(result.factoryAuditData!.auditor).toBeNull();
+      }
+    });
+
+    it('malformed JSON → null result', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Factory audit data': '{bad' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.factoryAuditData).toBeNull();
+      }
+    });
+  });
+
+  // ── parseDate (tested via parseRow with date columns) ─────────────
+
+  describe('parseDate via parseRow', () => {
+    it('ISO 8601 date → valid Date', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Date Outreached': '2025-03-15' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.dateOutreached).toBeInstanceOf(Date);
+        expect(result.dateOutreached!.toISOString()).toContain('2025-03-15');
+      }
+    });
+
+    it('"undefined" string → null', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Date Outreached': 'undefined' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.dateOutreached).toBeNull();
+      }
+    });
+
+    it('empty string → null', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Date Outreached': '' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.dateOutreached).toBeNull();
+      }
+    });
+
+    it('invalid date string → null', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Date Outreached': 'not-a-date' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.dateOutreached).toBeNull();
+      }
+    });
+  });
+
+  // ── parseIntSafe (tested via lead time fields) ────────────────────
+
+  describe('parseIntSafe via parseRow', () => {
+    it('"1000" → 1000', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Production leadtime day min': '1000' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.productionLeadTimeDayMin).toBe(1000);
+      }
+    });
+
+    it('empty → null', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Production leadtime day min': '' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.productionLeadTimeDayMin).toBeNull();
+      }
+    });
+
+    it('"abc" → null', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Production leadtime day min': 'abc' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.productionLeadTimeDayMin).toBeNull();
+      }
+    });
+  });
+
+  // ── CoC boolean parsing ───────────────────────────────────────────
+
+  describe('CoC boolean parsing via parseRow', () => {
+    it('"1" → true', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Coc acknowledged': '1' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.cocAcknowledged).toBe(true);
+      }
+    });
+
+    it('"0" → false', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Coc acknowledged': '0' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.cocAcknowledged).toBe(false);
+      }
+    });
+
+    it('"true" → true', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Coc acknowledged': 'true' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.cocAcknowledged).toBe(true);
+      }
+    });
+
+    it('"yes" → true', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Coc acknowledged': 'yes' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.cocAcknowledged).toBe(true);
+      }
+    });
+
+    it('"" → false', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Coc acknowledged': '' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.cocAcknowledged).toBe(false);
+      }
+    });
+  });
+
+  // ── STATUS_MAP (tested via parseRow with Status column) ───────────
+
+  describe('STATUS_MAP via parseRow', () => {
+    it('"Qualified" → "Fully Qualified"', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Status': 'Qualified' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.qualificationStage).toBe('Fully Qualified');
+      }
+    });
+
+    it('"Unqualified" → "Identified"', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Status': 'Unqualified' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.qualificationStage).toBe('Identified');
+      }
+    });
+
+    it('"Historical" → "Historical"', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Status': 'Historical' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.qualificationStage).toBe('Historical');
+      }
+    });
+
+    it('unknown status → null', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Status': 'SomeUnknownStatus' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.qualificationStage).toBeNull();
+      }
+    });
+  });
+
+  // ── CERT_TYPE_MAP normalisation ───────────────────────────────────
+
+  describe('CERT_TYPE_MAP normalisation via parseRow', () => {
+    it('"ISO 9001 - Quality" → certTypes contains "ISO_9001"', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Certs & Audits': 'ISO 9001 - Quality' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.certTypes).toContain('ISO_9001');
+      }
+    });
+
+    it('"SMETA - Social Audit" → "SMETA"', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Certs & Audits': 'SMETA - Social Audit' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.certTypes).toContain('SMETA');
+      }
+    });
+
+    it('"Sedex Member" → "SMETA"', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Certs & Audits': 'Sedex Member' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.certTypes).toContain('SMETA');
+      }
+    });
+
+    it('unknown cert → "other"', () => {
+      const row = { 'Company Name': 'Test', 'Country': 'AU', 'Certs & Audits': 'SomeUnknownCert' };
+      const result = parseRow(row, 1);
+      expect('error' in result).toBe(false);
+      if (!('error' in result)) {
+        expect(result.certTypes).toContain('other');
+      }
+    });
+
+    it('normaliseCertType exported function works directly', () => {
+      expect(normaliseCertType('ISO 9001')).toBe('ISO_9001');
+      expect(normaliseCertType('gmp')).toBe('GMP');
+      expect(normaliseCertType('Cruelty Free')).toBe('cruelty_free');
+      expect(normaliseCertType('random thing')).toBe('other');
+    });
+  });
+
+  // ── Duplicate header suffixing ────────────────────────────────────
+
+  describe('duplicate header suffixing', () => {
+    it('deduplicates repeated column names', () => {
+      const text = csv(
+        'Supplier Type,Supplier Type,Supplier Type',
+        'val1,val2,val3',
+      );
+      const rows = parseCsvText(text);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]['Supplier Type']).toBe('val1');
+      expect(rows[0]['Supplier Type_2']).toBe('val2');
+      expect(rows[0]['Supplier Type_3']).toBe('val3');
+    });
   });
 });

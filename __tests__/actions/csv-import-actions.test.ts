@@ -3,9 +3,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const { mockGetAuthContext, mockPrismaClient } = vi.hoisted(() => {
   const mockPrismaClient = {
     aosSupplier: { findMany: vi.fn(), create: vi.fn() },
-    certification: { create: vi.fn() },
-    agreement: { create: vi.fn() },
-    supplierContact: { create: vi.fn() },
+    certification: { create: vi.fn(), createMany: vi.fn() },
+    agreement: { create: vi.fn(), createMany: vi.fn() },
+    supplierContact: { create: vi.fn(), createMany: vi.fn() },
+    factoryAudit: { create: vi.fn(), createMany: vi.fn() },
     activity: { create: vi.fn() },
     $transaction: vi.fn(),
   };
@@ -39,20 +40,58 @@ function makeParsedSupplier(overrides: Partial<ParsedSupplier> = {}): ParsedSupp
   return {
     row: 2,
     companyName: 'Test Supplier',
+    companyLegalName: null,
     country: 'Australia',
     categories: ['Skincare'],
     subcategories: ['Moisturiser'],
     capabilityType: 'turnkey',
     moq: 1000,
+    moqInfo: null,
     keyBrands: ['BrandA'],
     companyCity: 'Melbourne',
     factoryCity: 'Shenzhen',
     factoryCountry: 'China',
     certTypes: ['GMP', 'ISO'],
+    certCategory: null,
+    regulatoryCerts: [],
     agreementTypes: ['NDA'],
     contactName: 'Jane Doe',
     contactEmail: 'jane@test.com',
     contactMobile: '+61400000000',
+    qualificationStage: null,
+    activeSkus: [],
+    region: null,
+    marketExperience: [],
+    acquisitionSource: null,
+    currency: null,
+    supplierCode: null,
+    legacyId: null,
+    cautionFlag: false,
+    cautionNote: null,
+    dateOutreached: null,
+    dateQualified: null,
+    productionLeadTimeDayMin: null,
+    productionLeadTimeDayMax: null,
+    productionLeadTimeInfo: null,
+    fillCapabilities: [],
+    fillPackagingNotes: null,
+    ndaLink: null,
+    ndaStart: null,
+    ndaExpiry: null,
+    ndaStatus: null,
+    nonCircumventMonths: null,
+    agreementLink: null,
+    agreementNotes: null,
+    cocAcknowledged: false,
+    cocLink: null,
+    cocDateAccepted: null,
+    certificationLink: null,
+    ipOwnership: null,
+    atelierBrands: [],
+    atelierNote: null,
+    factoryNotes: null,
+    paymentTerms: null,
+    factoryAuditData: null,
     raw: { 'Company Name': 'Test Supplier', Country: 'Australia' },
     ...overrides,
   };
@@ -175,9 +214,10 @@ describe('csv-import actions', () => {
     beforeEach(() => {
       txMock = {
         aosSupplier: { findMany: vi.fn(), create: vi.fn() },
-        certification: { create: vi.fn() },
-        agreement: { create: vi.fn() },
-        supplierContact: { create: vi.fn() },
+        certification: { create: vi.fn(), createMany: vi.fn() },
+        agreement: { create: vi.fn(), createMany: vi.fn() },
+        supplierContact: { create: vi.fn(), createMany: vi.fn() },
+        factoryAudit: { create: vi.fn(), createMany: vi.fn() },
         activity: { create: vi.fn() },
         $transaction: vi.fn(),
       };
@@ -187,8 +227,13 @@ describe('csv-import actions', () => {
 
       txMock.aosSupplier.create.mockResolvedValue({ id: 'sup-new' });
       txMock.certification.create.mockResolvedValue({ id: 'cert-new' });
+      txMock.certification.createMany.mockResolvedValue({ count: 0 });
       txMock.agreement.create.mockResolvedValue({ id: 'agr-new' });
+      txMock.agreement.createMany.mockResolvedValue({ count: 0 });
       txMock.supplierContact.create.mockResolvedValue({ id: 'contact-new' });
+      txMock.supplierContact.createMany.mockResolvedValue({ count: 0 });
+      txMock.factoryAudit.create.mockResolvedValue({ id: 'audit-new' });
+      txMock.factoryAudit.createMany.mockResolvedValue({ count: 0 });
       txMock.activity.create.mockResolvedValue({ id: 'act-new' });
     });
 
@@ -218,7 +263,7 @@ describe('csv-import actions', () => {
       await commitCsvImport([supplier]);
 
       expect(txMock.aosSupplier.create).toHaveBeenCalledWith({
-        data: {
+        data: expect.objectContaining({
           companyName: 'Acme Co',
           companyCountry: 'Australia',
           companyCity: 'Sydney',
@@ -230,7 +275,7 @@ describe('csv-import actions', () => {
           moq: 500,
           keyBrands: ['BrandX'],
           teamId: 'team-1',
-        },
+        }),
       });
     });
 
@@ -246,40 +291,36 @@ describe('csv-import actions', () => {
       expect(createCall.data.factoryCountry).toBe('Australia');
     });
 
-    it('creates certifications for each certType', async () => {
+    it('creates certifications for each certType via createMany', async () => {
       const supplier = makeParsedSupplier({
-        certTypes: ['GMP', 'ISO', 'Halal'],
+        certTypes: ['GMP', 'ISO_9001', 'Halal'],
         agreementTypes: [],
         contactName: null,
       });
 
       await commitCsvImport([supplier]);
 
-      expect(txMock.certification.create).toHaveBeenCalledTimes(3);
-      expect(txMock.certification.create).toHaveBeenCalledWith({
-        data: {
-          aosSupplierId: 'sup-new',
-          certType: 'GMP',
-          verificationStatus: 'unverified',
-        },
-      });
-      expect(txMock.certification.create).toHaveBeenCalledWith({
-        data: {
-          aosSupplierId: 'sup-new',
-          certType: 'ISO',
-          verificationStatus: 'unverified',
-        },
-      });
-      expect(txMock.certification.create).toHaveBeenCalledWith({
-        data: {
-          aosSupplierId: 'sup-new',
-          certType: 'Halal',
-          verificationStatus: 'unverified',
-        },
-      });
+      expect(txMock.certification.createMany).toHaveBeenCalledTimes(1);
+      const certData = txMock.certification.createMany.mock.calls[0][0].data;
+      expect(certData).toHaveLength(3);
+      // normaliseCertType is applied again in commitCsvImport
+      expect(certData[0]).toEqual(expect.objectContaining({
+        aosSupplierId: 'sup-new',
+        certType: 'GMP',
+        certCategory: 'quality',
+        verificationStatus: 'unverified',
+      }));
+      expect(certData[1]).toEqual(expect.objectContaining({
+        aosSupplierId: 'sup-new',
+        certType: 'ISO_9001',
+      }));
+      expect(certData[2]).toEqual(expect.objectContaining({
+        aosSupplierId: 'sup-new',
+        certType: 'other',
+      }));
     });
 
-    it('creates agreements for each agreementType', async () => {
+    it('creates agreements for each agreementType via createMany', async () => {
       const supplier = makeParsedSupplier({
         certTypes: [],
         agreementTypes: ['NDA', 'MSA'],
@@ -288,24 +329,22 @@ describe('csv-import actions', () => {
 
       await commitCsvImport([supplier]);
 
-      expect(txMock.agreement.create).toHaveBeenCalledTimes(2);
-      expect(txMock.agreement.create).toHaveBeenCalledWith({
-        data: {
-          aosSupplierId: 'sup-new',
-          agreementType: 'NDA',
-          status: 'not_started',
-        },
-      });
-      expect(txMock.agreement.create).toHaveBeenCalledWith({
-        data: {
-          aosSupplierId: 'sup-new',
-          agreementType: 'MSA',
-          status: 'not_started',
-        },
-      });
+      expect(txMock.agreement.createMany).toHaveBeenCalledTimes(1);
+      const agrData = txMock.agreement.createMany.mock.calls[0][0].data;
+      expect(agrData).toHaveLength(2);
+      expect(agrData[0]).toEqual(expect.objectContaining({
+        aosSupplierId: 'sup-new',
+        agreementType: 'NDA',
+        status: 'not_started',
+      }));
+      expect(agrData[1]).toEqual(expect.objectContaining({
+        aosSupplierId: 'sup-new',
+        agreementType: 'MSA',
+        status: 'not_started',
+      }));
     });
 
-    it('creates contact when contactName is provided', async () => {
+    it('creates contact when contactName is provided via createMany', async () => {
       const supplier = makeParsedSupplier({
         certTypes: [],
         agreementTypes: [],
@@ -316,15 +355,15 @@ describe('csv-import actions', () => {
 
       await commitCsvImport([supplier]);
 
-      expect(txMock.supplierContact.create).toHaveBeenCalledTimes(1);
-      expect(txMock.supplierContact.create).toHaveBeenCalledWith({
-        data: {
-          aosSupplierId: 'sup-new',
-          name: 'Jane Doe',
-          email: 'jane@test.com',
-          mobile: '+61400000000',
-          isPrimary: true,
-        },
+      expect(txMock.supplierContact.createMany).toHaveBeenCalledTimes(1);
+      const contactData = txMock.supplierContact.createMany.mock.calls[0][0].data;
+      expect(contactData).toHaveLength(1);
+      expect(contactData[0]).toEqual({
+        aosSupplierId: 'sup-new',
+        name: 'Jane Doe',
+        email: 'jane@test.com',
+        mobile: '+61400000000',
+        isPrimary: true,
       });
     });
 
@@ -339,7 +378,7 @@ describe('csv-import actions', () => {
 
       await commitCsvImport([supplier]);
 
-      expect(txMock.supplierContact.create).not.toHaveBeenCalled();
+      expect(txMock.supplierContact.createMany).not.toHaveBeenCalled();
     });
 
     it('logs activity after import', async () => {
@@ -363,7 +402,7 @@ describe('csv-import actions', () => {
 
     it('returns correct counts', async () => {
       const suppliers = [
-        makeParsedSupplier({ certTypes: ['GMP', 'ISO'], agreementTypes: ['NDA'], contactName: 'Alice' }),
+        makeParsedSupplier({ certTypes: ['GMP', 'ISO_9001'], agreementTypes: ['NDA'], contactName: 'Alice' }),
         makeParsedSupplier({ companyName: 'Other Co', certTypes: [], agreementTypes: ['MSA'], contactName: null }),
       ];
 
@@ -394,26 +433,25 @@ describe('csv-import actions', () => {
 
       // tx was used
       expect(txMock.aosSupplier.create).toHaveBeenCalled();
-      expect(txMock.certification.create).toHaveBeenCalled();
-      expect(txMock.agreement.create).toHaveBeenCalled();
-      expect(txMock.supplierContact.create).toHaveBeenCalled();
+      expect(txMock.certification.createMany).toHaveBeenCalled();
+      expect(txMock.agreement.createMany).toHaveBeenCalled();
+      expect(txMock.supplierContact.createMany).toHaveBeenCalled();
       expect(txMock.activity.create).toHaveBeenCalled();
 
       // global prisma was NOT used for these operations
       expect(mockPrismaClient.aosSupplier.create).not.toHaveBeenCalled();
-      expect(mockPrismaClient.certification.create).not.toHaveBeenCalled();
-      expect(mockPrismaClient.agreement.create).not.toHaveBeenCalled();
-      expect(mockPrismaClient.supplierContact.create).not.toHaveBeenCalled();
+      expect(mockPrismaClient.certification.createMany).not.toHaveBeenCalled();
+      expect(mockPrismaClient.agreement.createMany).not.toHaveBeenCalled();
+      expect(mockPrismaClient.supplierContact.createMany).not.toHaveBeenCalled();
       expect(mockPrismaClient.activity.create).not.toHaveBeenCalled();
     });
 
     it('wraps all operations in $transaction so a failure rolls back the batch', async () => {
-      // Make certification.create fail on the second call
-      txMock.certification.create
-        .mockResolvedValueOnce({ id: 'cert-1' })
+      // Make certification.createMany fail
+      txMock.certification.createMany
         .mockRejectedValueOnce(new Error('DB constraint violation'));
 
-      const supplier = makeParsedSupplier({ certTypes: ['GMP', 'ISO'] });
+      const supplier = makeParsedSupplier({ certTypes: ['GMP', 'ISO_9001'] });
 
       // The whole commitCsvImport should reject because $transaction propagates the error
       await expect(commitCsvImport([supplier])).rejects.toThrow('DB constraint violation');
@@ -421,6 +459,153 @@ describe('csv-import actions', () => {
       // Verify $transaction was called (meaning all ops are inside it)
       expect(mockPrismaClient.$transaction).toHaveBeenCalledTimes(1);
       expect(mockPrismaClient.$transaction).toHaveBeenCalledWith(expect.any(Function));
+    });
+
+    // ─── NDA agreement creation from nda_data ───────────────────
+
+    it('creates NDA agreement from nda_data with status "Signed" → signed', async () => {
+      const supplier = makeParsedSupplier({
+        certTypes: [],
+        agreementTypes: [],
+        contactName: null,
+        ndaLink: 'http://example.com/nda.pdf',
+        ndaStatus: 'Signed',
+        ndaStart: new Date('2025-01-01'),
+        ndaExpiry: new Date('2026-01-01'),
+      });
+
+      await commitCsvImport([supplier]);
+
+      expect(txMock.agreement.createMany).toHaveBeenCalledTimes(1);
+      const agrData = txMock.agreement.createMany.mock.calls[0][0].data;
+      expect(agrData).toHaveLength(1);
+      expect(agrData[0]).toEqual(expect.objectContaining({
+        aosSupplierId: 'sup-new',
+        agreementType: 'NDA',
+        status: 'signed',
+        documentLink: 'http://example.com/nda.pdf',
+      }));
+    });
+
+    it('creates NDA agreement with status "Progressing" → sent', async () => {
+      const supplier = makeParsedSupplier({
+        certTypes: [],
+        agreementTypes: [],
+        contactName: null,
+        ndaStatus: 'Progressing',
+        ndaLink: null,
+        ndaStart: null,
+        ndaExpiry: null,
+      });
+
+      // ndaStatus alone triggers NDA creation
+      await commitCsvImport([supplier]);
+
+      expect(txMock.agreement.createMany).toHaveBeenCalledTimes(1);
+      const agrData = txMock.agreement.createMany.mock.calls[0][0].data;
+      expect(agrData[0]).toEqual(expect.objectContaining({
+        agreementType: 'NDA',
+        status: 'sent',
+      }));
+    });
+
+    it('creates NDA agreement with status "Issues" → not_started', async () => {
+      const supplier = makeParsedSupplier({
+        certTypes: [],
+        agreementTypes: [],
+        contactName: null,
+        ndaStatus: 'Issues',
+      });
+
+      await commitCsvImport([supplier]);
+
+      expect(txMock.agreement.createMany).toHaveBeenCalledTimes(1);
+      const agrData = txMock.agreement.createMany.mock.calls[0][0].data;
+      expect(agrData[0]).toEqual(expect.objectContaining({
+        agreementType: 'NDA',
+        status: 'not_started',
+      }));
+    });
+
+    // ─── Duplicate NDA guard ────────────────────────────────────
+
+    it('supplier with nda_data AND "NDA" in agreementTypes → only one NDA agreement', async () => {
+      const supplier = makeParsedSupplier({
+        certTypes: [],
+        contactName: null,
+        ndaLink: 'http://example.com/nda.pdf',
+        ndaStatus: 'Signed',
+        agreementTypes: ['NDA', 'MSA'],
+      });
+
+      await commitCsvImport([supplier]);
+
+      expect(txMock.agreement.createMany).toHaveBeenCalledTimes(1);
+      const agrData = txMock.agreement.createMany.mock.calls[0][0].data;
+      // Should have NDA from nda_data + MSA from agreementTypes, but NOT a duplicate NDA
+      const ndaAgreements = agrData.filter((a: { agreementType: string }) => a.agreementType === 'NDA');
+      expect(ndaAgreements).toHaveLength(1);
+      expect(ndaAgreements[0].status).toBe('signed'); // from nda_data, not 'not_started'
+      const msaAgreements = agrData.filter((a: { agreementType: string }) => a.agreementType === 'MSA');
+      expect(msaAgreements).toHaveLength(1);
+    });
+
+    // ─── Regulatory cert creation ───────────────────────────────
+
+    it('supplier with regulatoryCerts creates cert with certCategory "regulatory"', async () => {
+      const supplier = makeParsedSupplier({
+        certTypes: [],
+        regulatoryCerts: ['TGA'],
+        agreementTypes: [],
+        contactName: null,
+      });
+
+      await commitCsvImport([supplier]);
+
+      expect(txMock.certification.createMany).toHaveBeenCalledTimes(1);
+      const certData = txMock.certification.createMany.mock.calls[0][0].data;
+      expect(certData).toHaveLength(1);
+      expect(certData[0]).toEqual(expect.objectContaining({
+        aosSupplierId: 'sup-new',
+        certType: 'TGA',
+        certCategory: 'regulatory',
+        verificationStatus: 'unverified',
+      }));
+    });
+
+    // ─── Factory audit creation ─────────────────────────────────
+
+    it('supplier with factoryAuditData creates FactoryAudit record', async () => {
+      const auditDate = new Date('2025-06-01');
+      const supplier = makeParsedSupplier({
+        certTypes: [],
+        agreementTypes: [],
+        contactName: null,
+        factoryAuditData: {
+          score: 85,
+          auditedOn: auditDate,
+          auditor: 'SGS',
+          location: 'Shenzhen',
+          visitType: 'on-site',
+          actionItems: 'Fix ventilation',
+          followUp: '2025-12-01',
+        },
+      });
+
+      await commitCsvImport([supplier]);
+
+      expect(txMock.factoryAudit.createMany).toHaveBeenCalledTimes(1);
+      const auditData = txMock.factoryAudit.createMany.mock.calls[0][0].data;
+      expect(auditData).toHaveLength(1);
+      expect(auditData[0]).toEqual(expect.objectContaining({
+        aosSupplierId: 'sup-new',
+        score: 85,
+        auditedOn: auditDate,
+        auditor: 'SGS',
+        location: 'Shenzhen',
+        visitType: 'on-site',
+        actionItems: 'Fix ventilation',
+      }));
     });
   });
 });
