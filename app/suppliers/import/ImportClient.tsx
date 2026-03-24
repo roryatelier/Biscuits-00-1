@@ -3,27 +3,8 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { previewCsvImport, commitCsvImport } from '@/lib/actions/csv-import';
+import type { ParsedSupplier } from '@/lib/csv-parser';
 import styles from './Import.module.css';
-
-type ParsedSupplier = {
-  row: number;
-  companyName: string;
-  country: string;
-  categories: string[];
-  subcategories: string[];
-  capabilityType: string;
-  moq: number | null;
-  keyBrands: string[];
-  companyCity: string | null;
-  factoryCity: string | null;
-  factoryCountry: string | null;
-  certTypes: string[];
-  agreementTypes: string[];
-  contactName: string | null;
-  contactEmail: string | null;
-  contactMobile: string | null;
-  raw: Record<string, string>;
-};
 
 type ImportPreview = {
   valid: ParsedSupplier[];
