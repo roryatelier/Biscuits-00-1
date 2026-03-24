@@ -177,3 +177,13 @@ _Generated 17 March 2026 from live platform inspection + CTO/Design review._
 **What:** "Update brief" / "Order sample" tab toggle at top of brief view. Formulation card (read-only) + Packaging card (read-only) in order context. "Place sample order" blue CTA. Cancel button. Needs: supplier integration design, approval workflow, payment consideration. Likely needs sub-tickets.
 
 **Blocked by:** Phase 3a, 3d (brief + packaging cards).
+
+---
+
+## Supplier DB — Deferred Items
+
+- [ ] **Unbounded duplicate-detection query in previewCsvImport** — `lib/actions/csv-import.ts:26-31` fetches ALL suppliers for duplicate detection with no LIMIT. At 570 suppliers this is fine; at 2000+ it'll cause memory pressure. Add pagination or count-based approach when supplier count grows.
+
+- [ ] **Production CSV dry-run validation** — Before the first real import, run the production CSV (`Supplier DB export 20260323.csv`) through `parseCsvForPreview` and verify <5% rejection rate. Write a script in `scripts/` that reports parse stats. Depends on: all parser fixes landing first.
+
+- [ ] **updateAosSupplier does not accept new fields** — `lib/actions/suppliers.ts:173-199` only allows editing companyName, categories, subcategories, moq, keyBrands. The 17 new fields (region, currency, moqInfo, lead times, dates, CoC, etc.) are read-only after import. Expand the action signature. Depends on: S-10 profile tab restructure for UI.
