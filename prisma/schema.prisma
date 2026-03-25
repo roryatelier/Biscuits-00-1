@@ -715,8 +715,9 @@ model SupplierBrief {
   requirements     Json    @default("{}")  // {vegan?: boolean, organic?: boolean, ...}
   teamId           String
 
-  team        Team                      @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  assignments SupplierBriefAssignment[]
+  team              Team                      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  assignments       SupplierBriefAssignment[]
+  briefRequirements BriefRequirement[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -734,6 +735,10 @@ model SupplierBriefAssignment {
   status            String    @default("assigned") // assigned, vetted, rejected
   assignedById      String
   notes             Json      @default("[]") // array of {text, author, date, type}
+  complianceBreakdown  Json?   // { requirementId: { tier: string, statusLabel: string, evidenceText: string } }
+  mustHaveScore        Float?
+  niceToHaveScore      Float?
+  complianceFlags      Json?   // [{ layer, issue, severity: "blocker" | "warning" }]
 
   aosSupplier   AosSupplier   @relation(fields: [aosSupplierId], references: [id], onDelete: Cascade)
   supplierBrief SupplierBrief @relation(fields: [supplierBriefId], references: [id], onDelete: Cascade)
@@ -743,5 +748,25 @@ model SupplierBriefAssignment {
   updatedAt DateTime @updatedAt
 
   @@unique([aosSupplierId, supplierBriefId])
+  @@index([supplierBriefId])
+}
+
+model BriefRequirement {
+  id              String  @id @default(cuid())
+  supplierBriefId String
+  layer           String  // manufacturer | product | market
+  category        String  // cert | social_audit | agreement | sds | product_match | status
+  requirement     String  // human-readable label e.g. "ISO 9001"
+  ruleKey         String? // machine key for deterministic checks e.g. "iso_9001"
+  priority        String  @default("nice_to_have") // must_have | nice_to_have
+  sourceDocId     String? // FK to BriefDocument (future)
+  sourcePageRef   String? // page/section reference
+  extractedBy     String  @default("manual") // manual | llm
+
+  supplierBrief SupplierBrief @relation(fields: [supplierBriefId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([supplierBriefId])
 }

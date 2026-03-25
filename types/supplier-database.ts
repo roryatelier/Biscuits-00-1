@@ -139,3 +139,40 @@ export type UnifiedSupplier = {
 
 export type ViewMode = 'all' | 'aos' | 'discovery';
 export type SourceFilter = '' | 'aos' | 'cobalt' | 'both';
+
+// ─── Compliance types ────────────────────────────────────
+
+export type BriefRequirementInfo = {
+  id: string;
+  layer: 'manufacturer' | 'product' | 'market';
+  category: string;
+  requirement: string;
+  ruleKey: string | null;
+  priority: 'must_have' | 'nice_to_have';
+  extractedBy: string;
+};
+
+export type ComplianceResult = {
+  tier: 'compliant' | 'gap' | 'blocker';
+  statusLabel: string;
+  evidenceText: string;
+};
+
+export type ComplianceBreakdown = Record<string, ComplianceResult>;
+
+export type ComplianceScore = {
+  overall: number | null;
+  mustHave: number | null;
+  niceToHave: number | null;
+  blockers: Array<{ layer: string; requirement: string; statusLabel: string }>;
+};
+
+export type ComplianceAssessmentRow = {
+  section: string;
+  requirement: string;
+  ruleKey: string | null;
+  priority: 'must_have' | 'nice_to_have';
+  tier: 'compliant' | 'gap' | 'blocker' | 'not_assessed';
+  statusLabel: string;
+  evidenceText: string;
+};
