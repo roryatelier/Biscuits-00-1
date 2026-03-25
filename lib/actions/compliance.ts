@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { withAuth } from '@/lib/actions/context';
 import { computeComplianceAssessment, computeComplianceScore } from '@/lib/compliance-assessment';
 import type { SupplierComplianceInput } from '@/lib/compliance-assessment';
+import { computeFullComplianceAssessment } from '@/lib/compliance-assessment-full';
+import type { FullSupplierComplianceInput } from '@/lib/compliance-assessment-full';
 
 export async function getComplianceAssessment(aosSupplierId: string) {
   return withAuth(async (ctx) => {
@@ -42,6 +44,60 @@ export async function getComplianceAssessment(aosSupplierId: string) {
     };
 
     const rows = computeComplianceAssessment(input);
+    const score = computeComplianceScore(rows);
+
+    return { rows, score, supplierName: supplier.companyName };
+  });
+}
+
+export async function getFullComplianceAssessment(aosSupplierId: string) {
+  return withAuth(async (ctx) => {
+    const supplier = await prisma.aosSupplier.findFirst({
+      where: { id: aosSupplierId, teamId: ctx.teamId },
+      include: {
+        certifications: true,
+        agreements: true,
+        audits: true,
+        contacts: true,
+      },
+    });
+    if (!supplier) return { error: 'Supplier not found' };
+
+    const input: FullSupplierComplianceInput = {
+      qualificationStage: supplier.qualificationStage,
+      factoryCountry: supplier.factoryCountry,
+      companyCountry: supplier.companyCountry,
+      certifications: supplier.certifications.map(c => ({
+        certType: c.certType,
+        certCategory: c.certCategory,
+        verificationStatus: c.verificationStatus,
+        expiryDate: c.expiryDate?.toISOString() || null,
+      })),
+      agreements: supplier.agreements.map(a => ({
+        agreementType: a.agreementType,
+        status: a.status,
+        signedAt: a.signedAt?.toISOString() || null,
+        expiryDate: a.expiryDate?.toISOString() || null,
+      })),
+      cocAcknowledged: supplier.cocAcknowledged,
+      factoryAudits: supplier.audits.map(a => ({
+        score: a.score,
+        auditedOn: a.auditedOn?.toISOString() || null,
+        auditor: a.auditor,
+      })),
+      companyName: supplier.companyName,
+      contacts: supplier.contacts.map(c => ({
+        name: c.name,
+        email: c.email,
+        mobile: c.mobile,
+        isPrimary: c.isPrimary,
+      })),
+      capabilityType: supplier.capabilityType,
+      activeSkus: (supplier.activeSkus as string[]) || [],
+      keyBrands: (supplier.keyBrands as string[]) || [],
+    };
+
+    const rows = computeFullComplianceAssessment(input);
     const score = computeComplianceScore(rows);
 
     return { rows, score, supplierName: supplier.companyName };

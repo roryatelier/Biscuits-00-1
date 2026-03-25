@@ -245,6 +245,15 @@ export default function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProp
                   Briefs
                 </p>
                 <p
+                  className={`${styles.optionItem} ${isActive('/suppliers/shortlisting') ? styles.active : ''}`}
+                  onClick={() => nav('/suppliers/shortlisting')}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={e => e.key === 'Enter' && nav('/suppliers/shortlisting')}
+                >
+                  Brief Shortlisting
+                </p>
+                <p
                   className={`${styles.optionItem} ${isActive('/suppliers/import') ? styles.active : ''}`}
                   onClick={() => nav('/suppliers/import')}
                   role="button"
