@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import EmptyState from '@/components/EmptyState/EmptyState';
 import { getSupplierBrief, createSupplierBrief } from '@/lib/actions/supplier-briefs';
 import {
@@ -610,6 +611,13 @@ export default function BriefsClient({ briefs }: { briefs: Brief[] }) {
                                 </span>
                               )}
                             </div>
+                            <Link
+                              href={`/suppliers/${a.aosSupplier.id}?tab=compliance`}
+                              className={styles.complianceLink}
+                              onClick={e => e.stopPropagation()}
+                            >
+                              View Compliance &rarr;
+                            </Link>
                           </div>
                           <div className={styles.matchScoreCol}>
                             {a.matchScore != null ? (

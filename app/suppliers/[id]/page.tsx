@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import PlatformLayout from '@/components/PlatformLayout/PlatformLayout';
 import { getAosSupplier } from '@/lib/actions/suppliers';
@@ -79,7 +80,9 @@ export default async function SupplierProfilePage({ params }: { params: Promise<
 
   return (
     <PlatformLayout>
-      <SupplierProfileClient supplier={serialized} activities={serializedActivities} />
+      <Suspense>
+        <SupplierProfileClient supplier={serialized} activities={serializedActivities} />
+      </Suspense>
     </PlatformLayout>
   );
 }

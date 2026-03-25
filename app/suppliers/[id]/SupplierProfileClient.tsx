@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useTransition, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { transitionSupplierStage, setCautionFlag } from '@/lib/actions/suppliers';
 import { addCertification, updateCertification, removeCertification, updateAgreementStatus } from '@/lib/actions/certifications';
 import { addManualActivity } from '@/lib/actions/supplier-activities';
@@ -20,6 +20,7 @@ import {
   type PermissionLevel,
   type CapabilityType,
 } from '@/lib/constants/suppliers';
+import ComplianceAssessment from './ComplianceAssessment';
 import styles from './SupplierProfile.module.css';
 
 const AGREEMENT_STATUSES: { value: string; label: string }[] = [
@@ -118,12 +119,16 @@ function matchesActivityFilter(activity: ActivityEntry, filter: ActivityFilter):
   return true;
 }
 
-type TabName = 'overview' | 'certifications' | 'agreements' | 'briefs' | 'activity';
+type TabName = 'overview' | 'certifications' | 'agreements' | 'compliance' | 'briefs' | 'activity';
+
+const VALID_TABS: TabName[] = ['overview', 'certifications', 'agreements', 'compliance', 'briefs', 'activity'];
 
 export default function SupplierProfileClient({ supplier, activities = [] }: { supplier: SupplierProfile; activities?: ActivityEntry[] }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-  const [activeTab, setActiveTab] = useState<TabName>('overview');
+  const initialTab = VALID_TABS.includes(searchParams.get('tab') as TabName) ? (searchParams.get('tab') as TabName) : 'overview';
+  const [activeTab, setActiveTab] = useState<TabName>(initialTab);
   const [showAddCert, setShowAddCert] = useState(false);
   const [newCertType, setNewCertType] = useState('');
   const [newCertBody, setNewCertBody] = useState('');
@@ -245,6 +250,7 @@ export default function SupplierProfileClient({ supplier, activities = [] }: { s
     { key: 'overview', label: 'Overview' },
     { key: 'certifications', label: `Certifications (${supplier.certifications.length})` },
     { key: 'agreements', label: `Agreements (${supplier.agreements.length})` },
+    { key: 'compliance', label: 'Compliance' },
     { key: 'briefs', label: `Briefs (${supplier.briefAssignments.length})` },
     { key: 'activity', label: `Activity (${activities.length})` },
   ];
@@ -556,6 +562,10 @@ export default function SupplierProfileClient({ supplier, activities = [] }: { s
               </div>
             )}
           </div>
+        )}
+
+        {activeTab === 'compliance' && (
+          <ComplianceAssessment supplierId={supplier.id} />
         )}
 
         {activeTab === 'briefs' && (

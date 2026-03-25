@@ -1,0 +1,275 @@
+/* Compliance Assessment Tab */
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #bbb;
+  font-size: 14px;
+}
+
+.error {
+  padding: 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 13px;
+}
+
+/* Score card */
+.scoreCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.overallScore {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 100px;
+}
+
+.overallNumber {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.overallLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.scoreDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scoreRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scoreLabel {
+  font-size: 13px;
+  color: #888;
+  min-width: 100px;
+}
+
+.scoreValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.blockerSummary {
+  margin-top: 4px;
+}
+
+.blockerCount {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ef4444;
+  background: #fef2f2;
+  padding: 2px 10px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.blockerList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.blockerItem {
+  font-size: 12px;
+  color: #888;
+}
+
+/* Color variants */
+.scoreGreen {
+  color: #16a34a;
+}
+
+.scoreAmber {
+  color: #d97706;
+}
+
+.scoreRed {
+  color: #ef4444;
+}
+
+.scoreGrey {
+  color: #9ca3af;
+}
+
+/* Section header */
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.1s;
+}
+
+.sectionHeader:hover {
+  background: #f0f0f0;
+}
+
+.sectionHeaderCollapsed {
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.sectionChevron {
+  font-size: 12px;
+  color: #888;
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+
+.sectionChevronOpen {
+  transform: rotate(90deg);
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Table */
+.tableWrapper {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.th {
+  font-size: 11px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+  padding: 8px 14px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #fafafa;
+}
+
+.tableRow {
+  transition: background 0.1s;
+}
+
+.tableRow:hover {
+  background: #fafafa;
+}
+
+.td {
+  font-size: 14px;
+  color: #333;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+.tableRow:last-child .td {
+  border-bottom: none;
+}
+
+.requirementCell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.requirementText {
+  font-size: 14px;
+  color: #333;
+}
+
+.requirementTextMust {
+  font-weight: 600;
+  color: #111;
+}
+
+.mustBadge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #555;
+  background: #f0f0f0;
+  padding: 1px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* Status pills */
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.statusCompliant {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.statusGap {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.statusBlocker {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.statusNotAssessed {
+  background: #f0f0f0;
+  color: #9ca3af;
+}
+
+/* Evidence column */
+.evidenceText {
+  font-size: 13px;
+  color: #888;
+}
