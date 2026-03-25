@@ -1,6 +1,6 @@
 .page {
   padding: 24px;
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -27,7 +27,7 @@
 /* Layout */
 .layout {
   display: grid;
-  grid-template-columns: 380px 1fr;
+  grid-template-columns: 240px 1fr;
   gap: 20px;
   align-items: flex-start;
 }
@@ -128,7 +128,7 @@
   background: #fff;
   border: 1px solid #e5e5e5;
   border-radius: 8px;
-  padding: 24px;
+  padding: 16px;
   min-height: 300px;
 }
 
@@ -499,7 +499,7 @@
   letter-spacing: 0.04em;
   border-bottom: 2px solid #e5e5e5;
   background: #fafafa;
-  width: 160px;
+  width: 130px;
 }
 
 .compareSupplierHeader {
