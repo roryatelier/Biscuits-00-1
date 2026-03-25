@@ -1,21 +1,22 @@
 import PlatformLayout from '@/components/PlatformLayout/PlatformLayout';
-import { listAosSuppliers } from '@/lib/actions/suppliers';
+import { listSupplierBriefs } from '@/lib/actions/supplier-briefs';
 import ShortlistingClient from './ShortlistingClient';
 
 export default async function ShortlistingPage() {
-  const suppliersResult = await listAosSuppliers();
-  const suppliers = Array.isArray(suppliersResult) ? suppliersResult : [];
+  const briefsResult = await listSupplierBriefs();
+  const briefs = Array.isArray(briefsResult) ? briefsResult : [];
 
-  const serialized = suppliers.map(s => ({
-    id: s.id,
-    companyName: s.companyName,
-    qualificationStage: s.qualificationStage,
-    factoryCountry: (s as Record<string, unknown>).factoryCountry as string | null,
+  const serialized = briefs.map(b => ({
+    id: b.id,
+    name: b.name,
+    customerName: b.customerName,
+    category: b.category,
+    dueDate: b.dueDate ? b.dueDate.toISOString() : null,
   }));
 
   return (
     <PlatformLayout>
-      <ShortlistingClient suppliers={serialized} />
+      <ShortlistingClient briefs={serialized} />
     </PlatformLayout>
   );
 }

@@ -1,15 +1,39 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getSupplierBrief } from '@/lib/actions/supplier-briefs';
 import { getFullComplianceAssessment } from '@/lib/actions/compliance';
 import type { ComplianceAssessmentRow, ComplianceScore } from '@/types/supplier-database';
 import styles from './Shortlisting.module.css';
 
-type SupplierOption = {
+type BriefOption = {
   id: string;
-  companyName: string;
-  qualificationStage: string;
-  factoryCountry: string | null;
+  name: string;
+  customerName: string | null;
+  category: string;
+  dueDate: string | null;
+};
+
+type AssignmentData = {
+  id: string;
+  aosSupplierId: string;
+  matchScore: number | null;
+  status: string;
+  aosSupplier: {
+    id: string;
+    companyName: string;
+  };
+};
+
+type BriefData = {
+  id: string;
+  name: string;
+  customerName: string | null;
+  category: string;
+  subcategory: string | null;
+  dueDate: Date | string | null;
+  requiredCerts: string[];
+  assignments: AssignmentData[];
 };
 
 const SECTION_ORDER = [
@@ -45,17 +69,28 @@ function groupBySection(rows: ComplianceAssessmentRow[]): Map<string, Compliance
   return map;
 }
 
-export default function ShortlistingClient({ suppliers }: { suppliers: SupplierOption[] }) {
-  const [selectedId, setSelectedId] = useState<string>('');
-  const [rows, setRows] = useState<ComplianceAssessmentRow[]>([]);
+function isRequiredCert(ruleKey: string | null, requiredCerts: string[]): boolean {
+  if (!ruleKey || requiredCerts.length === 0) return false;
+  const normalised = ruleKey.toLowerCase();
+  return requiredCerts.some(cert => cert.toLowerCase() === normalised);
+}
+
+export default function ShortlistingClient({ briefs }: { briefs: BriefOption[] }) {
+  const [selectedBriefId, setSelectedBriefId] = useState<string>('');
+  const [briefData, setBriefData] = useState<BriefData | null>(null);
+  const [selectedSupplierId, setSelectedSupplierId] = useState<string>('');
+  const [complianceRows, setComplianceRows] = useState<ComplianceAssessmentRow[]>([]);
   const [score, setScore] = useState<ComplianceScore | null>(null);
   const [supplierName, setSupplierName] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // When brief changes -> fetch brief data -> auto-select first supplier
   useEffect(() => {
-    if (!selectedId) {
-      setRows([]);
+    if (!selectedBriefId) {
+      setBriefData(null);
+      setSelectedSupplierId('');
+      setComplianceRows([]);
       setScore(null);
       setSupplierName('');
       return;
@@ -65,11 +100,51 @@ export default function ShortlistingClient({ suppliers }: { suppliers: SupplierO
     setLoading(true);
     setError(null);
 
-    getFullComplianceAssessment(selectedId).then(result => {
+    getSupplierBrief(selectedBriefId).then(result => {
+      if (cancelled) return;
+      if (!result || (typeof result === 'object' && 'error' in result)) {
+        setError((result as { error: string })?.error || 'Failed to load brief data');
+        setBriefData(null);
+        setSelectedSupplierId('');
+        setLoading(false);
+        return;
+      }
+
+      const data = result as unknown as BriefData;
+      setBriefData(data);
+
+      // Auto-select first supplier (sorted by matchScore desc from server)
+      const assignments = data.assignments || [];
+      if (assignments.length > 0) {
+        setSelectedSupplierId(assignments[0].aosSupplierId);
+      } else {
+        setSelectedSupplierId('');
+        setLoading(false);
+      }
+    });
+
+    return () => { cancelled = true; };
+  }, [selectedBriefId]);
+
+  // When supplier tab changes -> fetch compliance assessment
+  useEffect(() => {
+    if (!selectedSupplierId) {
+      setComplianceRows([]);
+      setScore(null);
+      setSupplierName('');
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    getFullComplianceAssessment(selectedSupplierId).then(result => {
       if (cancelled) return;
       if (!result || (typeof result === 'object' && 'error' in result)) {
         setError((result as { error: string })?.error || 'Failed to load compliance data');
-        setRows([]);
+        setComplianceRows([]);
         setScore(null);
         setSupplierName('');
       } else {
@@ -78,7 +153,7 @@ export default function ShortlistingClient({ suppliers }: { suppliers: SupplierO
           score: ComplianceScore;
           supplierName: string;
         };
-        setRows(data.rows);
+        setComplianceRows(data.rows);
         setScore(data.score);
         setSupplierName(data.supplierName);
       }
@@ -86,13 +161,26 @@ export default function ShortlistingClient({ suppliers }: { suppliers: SupplierO
     });
 
     return () => { cancelled = true; };
-  }, [selectedId]);
+  }, [selectedSupplierId]);
 
   // Filter out not_assessed rows
-  const assessedRows = rows.filter(r => r.tier !== 'not_assessed');
-  const notAssessedCount = rows.length - assessedRows.length;
-
+  const assessedRows = complianceRows.filter(r => r.tier !== 'not_assessed');
+  const notAssessedCount = complianceRows.length - assessedRows.length;
   const grouped = groupBySection(assessedRows);
+
+  const assignments = briefData?.assignments || [];
+  const requiredCerts = briefData?.requiredCerts || [];
+
+  // Format due date for display
+  const formatDueDate = (d: Date | string | null): string | null => {
+    if (!d) return null;
+    try {
+      const date = typeof d === 'string' ? new Date(d) : d;
+      return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch {
+      return null;
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -100,28 +188,71 @@ export default function ShortlistingClient({ suppliers }: { suppliers: SupplierO
         <h1 className={styles.pageTitle}>Brief Shortlisting</h1>
       </div>
 
-      {/* Supplier selector */}
+      {/* Brief selector */}
       <div className={styles.selectorRow}>
-        <label className={styles.selectorLabel} htmlFor="supplier-select">
-          Supplier
+        <label className={styles.selectorLabel} htmlFor="brief-select">
+          Brief
         </label>
         <select
-          id="supplier-select"
+          id="brief-select"
           className={styles.selectorDropdown}
-          value={selectedId}
-          onChange={e => setSelectedId(e.target.value)}
+          value={selectedBriefId}
+          onChange={e => {
+            setSelectedBriefId(e.target.value);
+            setSelectedSupplierId('');
+            setComplianceRows([]);
+            setScore(null);
+          }}
         >
-          <option value="">Select a supplier...</option>
-          {suppliers.map(s => (
-            <option key={s.id} value={s.id}>
-              {s.companyName}
-              {s.factoryCountry ? ` (${s.factoryCountry})` : ''}
-              {' — '}
-              {s.qualificationStage}
+          <option value="">Select a brief...</option>
+          {briefs.map(b => (
+            <option key={b.id} value={b.id}>
+              {b.name}
+              {b.customerName ? ` — ${b.customerName}` : ''}
             </option>
           ))}
         </select>
       </div>
+
+      {/* Brief context header */}
+      {briefData && (
+        <div className={styles.briefHeader}>
+          <span className={styles.briefName}>{briefData.name}</span>
+          {briefData.customerName && (
+            <span className={styles.briefMeta}>{briefData.customerName}</span>
+          )}
+          <span className={styles.briefMeta}>{briefData.category}</span>
+          {briefData.dueDate && (
+            <span className={styles.briefMeta}>Due: {formatDueDate(briefData.dueDate)}</span>
+          )}
+          {requiredCerts.length > 0 && (
+            <span className={styles.briefMeta}>
+              Certs:
+              {requiredCerts.map(cert => (
+                <span key={cert} className={styles.briefCertChip}>{cert}</span>
+              ))}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Supplier tabs */}
+      {briefData && assignments.length > 0 && (
+        <div className={styles.supplierTabs}>
+          {assignments.map(a => (
+            <button
+              key={a.aosSupplierId}
+              className={`${styles.supplierTab}${a.aosSupplierId === selectedSupplierId ? ` ${styles.supplierTabActive}` : ''}`}
+              onClick={() => setSelectedSupplierId(a.aosSupplierId)}
+            >
+              {a.aosSupplier.companyName}
+              {a.matchScore != null && (
+                <span className={styles.supplierTabScore}>{a.matchScore}%</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Loading */}
       {loading && <div className={styles.loading}>Loading compliance assessment...</div>}
@@ -129,15 +260,21 @@ export default function ShortlistingClient({ suppliers }: { suppliers: SupplierO
       {/* Error */}
       {error && <div className={styles.error}>{error}</div>}
 
-      {/* Empty state */}
-      {!selectedId && !loading && (
+      {/* Empty states */}
+      {!selectedBriefId && !loading && (
         <div className={styles.emptyState}>
-          Select a supplier above to generate their compliance audit document.
+          Select a brief above to review supplier compliance.
+        </div>
+      )}
+
+      {selectedBriefId && briefData && assignments.length === 0 && !loading && (
+        <div className={styles.emptyState}>
+          No suppliers assigned to this brief. Assign suppliers from the Briefs page.
         </div>
       )}
 
       {/* Assessment content */}
-      {selectedId && !loading && !error && rows.length > 0 && (
+      {selectedSupplierId && !loading && !error && complianceRows.length > 0 && (
         <>
           {/* Audit table */}
           <div className={styles.tableContainer}>
@@ -160,6 +297,9 @@ export default function ShortlistingClient({ suppliers }: { suppliers: SupplierO
                     >
                       <td>
                         <span className={styles.requirementText}>{row.requirement}</span>
+                        {isRequiredCert(row.ruleKey, requiredCerts) && (
+                          <span className={styles.requiredTag}>Required</span>
+                        )}
                       </td>
                       <td>
                         <span className={`${styles.statusCell} ${TIER_STYLE[row.tier]}`}>
