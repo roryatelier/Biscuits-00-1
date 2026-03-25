@@ -22,26 +22,12 @@ const SECTION_ORDER = [
   'Contact & Commercial',
 ];
 
-const TIER_ICON: Record<ComplianceAssessmentRow['tier'], string> = {
-  compliant: '\u2705',    // green checkmark
-  gap: '\uD83D\uDD34',   // red dot
-  blocker: '\u274C',      // red X
-  not_assessed: '\u2014', // em dash
-};
-
 const TIER_STYLE: Record<ComplianceAssessmentRow['tier'], string> = {
   compliant: styles.statusCompliant,
   gap: styles.statusGap,
   blocker: styles.statusBlocker,
   not_assessed: styles.statusNotAssessed,
 };
-
-function scoreColorClass(score: number | null): string {
-  if (score === null) return styles.scoreGrey;
-  if (score > 70) return styles.scoreGreen;
-  if (score >= 40) return styles.scoreAmber;
-  return styles.scoreRed;
-}
 
 function groupBySection(rows: ComplianceAssessmentRow[]): Map<string, ComplianceAssessmentRow[]> {
   const map = new Map<string, ComplianceAssessmentRow[]>();
@@ -102,22 +88,16 @@ export default function ShortlistingClient({ suppliers }: { suppliers: SupplierO
     return () => { cancelled = true; };
   }, [selectedId]);
 
-  const grouped = groupBySection(rows);
+  // Filter out not_assessed rows
+  const assessedRows = rows.filter(r => r.tier !== 'not_assessed');
+  const notAssessedCount = rows.length - assessedRows.length;
 
-  const breadcrumb = (
-    <div className={styles.breadcrumb}>
-      <a href="/suppliers" className={styles.breadcrumbLink}>Supplier Intelligence</a>
-      <span className={styles.breadcrumbSep}>/</span>
-      <span className={styles.breadcrumbCurrent}>Brief Shortlisting</span>
-    </div>
-  );
+  const grouped = groupBySection(assessedRows);
 
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        {breadcrumb}
         <h1 className={styles.pageTitle}>Brief Shortlisting</h1>
-        <p className={styles.pageSubtitle}>Single-supplier compliance audit document</p>
       </div>
 
       {/* Supplier selector */}
@@ -159,39 +139,13 @@ export default function ShortlistingClient({ suppliers }: { suppliers: SupplierO
       {/* Assessment content */}
       {selectedId && !loading && !error && rows.length > 0 && (
         <>
-          {/* Supplier name */}
-          <div className={styles.supplierNameBar}>{supplierName}</div>
-
-          {/* Score summary — compact single line */}
-          {score && (
-            <div className={styles.scoreSummary}>
-              <div className={styles.scoreItem}>
-                <span className={styles.scoreItemLabel}>Overall</span>
-                <span className={`${styles.scoreItemValue} ${scoreColorClass(score.overall)}`}>
-                  {score.overall !== null ? `${score.overall}%` : 'N/A'}
-                </span>
-              </div>
-              <div className={styles.scoreItem}>
-                <span className={styles.scoreItemLabel}>Must-have</span>
-                <span className={`${styles.scoreItemValue} ${scoreColorClass(score.mustHave)}`}>
-                  {score.mustHave !== null ? `${score.mustHave}%` : 'N/A'}
-                </span>
-              </div>
-              {score.blockers.length > 0 && (
-                <div className={styles.blockerPill}>
-                  {score.blockers.length} blocker{score.blockers.length !== 1 ? 's' : ''}
-                </div>
-              )}
-            </div>
-          )}
-
           {/* Audit table */}
           <div className={styles.tableContainer}>
             <table className={styles.auditTable}>
               <thead>
                 <tr>
                   <th className={styles.colRequirement}>Requirement</th>
-                  <th className={styles.colStatus}>Status</th>
+                  <th className={styles.colStatus}>{supplierName || 'Supplier'}</th>
                   <th className={styles.colEvidence}>Validation / Evidence</th>
                 </tr>
               </thead>
@@ -199,30 +153,35 @@ export default function ShortlistingClient({ suppliers }: { suppliers: SupplierO
                 {SECTION_ORDER.map(section => {
                   const sectionRows = grouped.get(section) || [];
                   if (sectionRows.length === 0) return null;
-                  return [
-                    <tr key={`section-${section}`} className={styles.sectionRow}>
-                      <td colSpan={3}>{section}</td>
-                    </tr>,
-                    ...sectionRows.map((row, idx) => (
-                      <tr key={`${section}-${idx}`} className={styles.dataRow}>
-                        <td>
-                          <span className={styles.requirementText}>{row.requirement}</span>
-                        </td>
-                        <td>
-                          <span className={`${styles.statusCell} ${TIER_STYLE[row.tier]}`}>
-                            {TIER_ICON[row.tier]} {row.statusLabel}
-                          </span>
-                        </td>
-                        <td>
-                          <span className={styles.evidenceText}>{row.evidenceText}</span>
-                        </td>
-                      </tr>
-                    )),
-                  ];
+                  return sectionRows.map((row, idx) => (
+                    <tr
+                      key={`${section}-${idx}`}
+                      className={`${styles.dataRow}${idx === 0 ? ` ${styles.sectionFirst}` : ''}`}
+                    >
+                      <td>
+                        <span className={styles.requirementText}>{row.requirement}</span>
+                      </td>
+                      <td>
+                        <span className={`${styles.statusCell} ${TIER_STYLE[row.tier]}`}>
+                          {row.statusLabel}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={styles.evidenceText}>{row.evidenceText}</span>
+                      </td>
+                    </tr>
+                  ));
                 })}
               </tbody>
             </table>
           </div>
+
+          {/* Footnote for not-assessed rows */}
+          {notAssessedCount > 0 && (
+            <p className={styles.footnote}>
+              {notAssessedCount} requirement{notAssessedCount !== 1 ? 's' : ''} not yet assessed
+            </p>
+          )}
         </>
       )}
     </div>

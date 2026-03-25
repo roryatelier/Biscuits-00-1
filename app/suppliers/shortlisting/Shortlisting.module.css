@@ -12,39 +12,10 @@
   margin-bottom: 20px;
 }
 
-.breadcrumb {
-  font-size: 12px;
-  color: #94a3b8;
-  margin-bottom: 4px;
-}
-
-.breadcrumbLink {
-  color: #94a3b8;
-  text-decoration: none;
-}
-
-.breadcrumbLink:hover {
-  color: #64748b;
-}
-
-.breadcrumbSep {
-  margin: 0 6px;
-}
-
-.breadcrumbCurrent {
-  color: #64748b;
-}
-
 .pageTitle {
   font-size: 22px;
   font-weight: 700;
   color: #1e293b;
-  margin: 0 0 4px;
-}
-
-.pageSubtitle {
-  font-size: 13px;
-  color: #94a3b8;
   margin: 0;
 }
 
@@ -82,118 +53,56 @@
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.12);
 }
 
-/* ── Score Summary Bar ──────────────────────────── */
-
-.scoreSummary {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 10px 16px;
-  background: #fafafa;
-  border: 1px solid #e5e5e5;
-  border-radius: 6px;
-  margin-bottom: 16px;
-  font-size: 13px;
-}
-
-.scoreItem {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.scoreItemLabel {
-  color: #888;
-  font-weight: 500;
-}
-
-.scoreItemValue {
-  font-weight: 700;
-}
-
-.scoreGreen { color: #16a34a; }
-.scoreAmber { color: #d97706; }
-.scoreRed   { color: #ef4444; }
-.scoreGrey  { color: #9ca3af; }
-
-.blockerPill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #ef4444;
-  background: #fef2f2;
-  padding: 2px 10px;
-  border-radius: 4px;
-}
-
-/* ── Supplier Name ──────────────────────────────── */
-
-.supplierNameBar {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 12px;
-}
-
 /* ── Audit Table ────────────────────────────────── */
 
 .tableContainer {
   background: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  overflow: hidden;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
 }
 
 .auditTable {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
+  border: 1px solid #d1d5db;
 }
 
 /* Column widths */
 .colRequirement {
-  width: 250px;
+  width: 35%;
 }
 
 .colStatus {
-  width: 200px;
+  width: 25%;
 }
 
 .colEvidence {
-  /* remaining space */
+  width: 40%;
 }
 
 /* Table header */
 .auditTable thead th {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
-  color: #888;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  color: #1e293b;
+  text-transform: none;
+  letter-spacing: normal;
   text-align: left;
-  padding: 8px 14px;
-  border-bottom: 2px solid #e5e5e5;
-  background: #fafafa;
+  padding: 8px 10px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #d1d5db;
 }
 
-/* Section header rows */
-.sectionRow td {
-  font-size: 12px;
-  font-weight: 700;
-  color: #555;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  padding: 8px 14px;
-  background: #f5f5f5;
-  border-bottom: 1px solid #e5e5e5;
-  border-top: 1px solid #e5e5e5;
+/* Section separator — border-top on first row of each section group */
+.sectionFirst td {
+  border-top: 2px solid #e0e0e0;
 }
 
 /* Data rows */
 .dataRow td {
-  padding: 6px 14px;
+  padding: 4px 10px;
   border-bottom: 1px solid #f0f0f0;
   vertical-align: middle;
   color: #333;
@@ -240,8 +149,16 @@
 
 /* Evidence cell */
 .evidenceText {
+  font-size: 13px;
+  color: #555;
+}
+
+/* Footnote for not-assessed count */
+.footnote {
   font-size: 12px;
-  color: #888;
+  color: #94a3b8;
+  margin-top: 8px;
+  padding-left: 2px;
 }
 
 /* ── Loading / Error / Empty ────────────────────── */
@@ -283,10 +200,6 @@
     display: none;
   }
 
-  .breadcrumb {
-    display: none;
-  }
-
   .tableContainer {
     border: none;
     border-radius: 0;
@@ -294,12 +207,6 @@
 
   .auditTable thead th {
     background: #f5f5f5 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .sectionRow td {
-    background: #f0f0f0 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -312,9 +219,4 @@
   .statusBlocker { color: #ef4444 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .statusGap { color: #d97706 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .statusNotAssessed { color: #9ca3af !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-
-  .scoreSummary {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
 }
