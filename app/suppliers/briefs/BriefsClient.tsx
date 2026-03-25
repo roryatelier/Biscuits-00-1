@@ -581,11 +581,19 @@ export default function BriefsClient({ briefs }: { briefs: Brief[] }) {
                 {briefDetail.assignments.length === 0 ? (
                   <p className={styles.emptyText}>No suppliers assigned to this brief.</p>
                 ) : compareMode ? (
-                  <ComparisonTable
-                    assignments={[...briefDetail.assignments]
-                      .sort((a, b) => (b.matchScore ?? -1) - (a.matchScore ?? -1))}
-                    onSupplierClick={(id) => router.push(`/suppliers/${id}`)}
-                  />
+                  <>
+                    {briefDetail.assignments.length > 8 && (
+                      <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px' }}>
+                        Showing top 8 of {briefDetail.assignments.length} by match score
+                      </p>
+                    )}
+                    <ComparisonTable
+                      assignments={[...briefDetail.assignments]
+                        .sort((a, b) => (b.matchScore ?? -1) - (a.matchScore ?? -1))
+                        .slice(0, 8)}
+                      onSupplierClick={(id) => router.push(`/suppliers/${id}`)}
+                    />
+                  </>
                 ) : (
                   <div className={styles.supplierList}>
                     {briefDetail.assignments.map(a => {

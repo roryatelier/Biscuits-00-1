@@ -470,7 +470,7 @@
 
 /* Compare table */
 .compareTableWrapper {
-  overflow-x: auto;
+  overflow-x: hidden;
   border: 1px solid #e5e5e5;
   border-radius: 8px;
   width: 100%;
@@ -478,7 +478,6 @@
 
 .compareTable {
   width: 100%;
-  min-width: max-content;
   border-collapse: collapse;
   font-size: 13px;
   table-layout: fixed;
@@ -500,8 +499,7 @@
   letter-spacing: 0.04em;
   border-bottom: 2px solid #e5e5e5;
   background: #fafafa;
-  min-width: 140px;
-  width: 140px;
+  width: 130px;
 }
 
 .compareSupplierHeader {
@@ -512,8 +510,9 @@
   color: #111;
   border-bottom: 2px solid #e5e5e5;
   background: #fafafa;
-  min-width: 150px;
-  width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .compareSupplierLink {
